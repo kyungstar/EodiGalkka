@@ -77,7 +77,7 @@ export default class WorldService extends ResultBox {
                 return this.JustFalse('WN0');
 
         } catch (err) {
-
+            return this.JustErr(err);
         }
     }
 }
