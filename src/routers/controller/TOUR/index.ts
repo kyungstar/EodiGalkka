@@ -25,8 +25,4 @@ router.post("/mod/country/list", TourController.crawlerCountry);
 
 
 
-router.post("/mod/country/list", BoardController.crawlerCountry);
-
-
-
 export default router;

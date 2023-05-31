@@ -323,6 +323,11 @@
     "@types/mime" "*"
     "@types/node" "*"
 
+"@types/swagger-jsdoc@^6.0.1":
+  "integrity" "sha512-+MUpcbyxD528dECUBCEVm6abNuORdbuGjbrUdHDeAQ+rkPuo2a+L4N02WJHF3bonSSE6SJ3dUJwF2V6+cHnf0w=="
+  "resolved" "https://registry.npmjs.org/@types/swagger-jsdoc/-/swagger-jsdoc-6.0.1.tgz"
+  "version" "6.0.1"
+
 "@types/uuid@^9.0.1":
   "integrity" "sha512-rFT3ak0/2trgvp4yYZo5iKFEPsET7vKydKF+VRCxlQ9bpheehyAJH89dAkaLEq/j/RZXJIqcgsmPJKUP1Z28HA=="
   "resolved" "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.1.tgz"

@@ -7,6 +7,12 @@ import router from "../../Routers/Controller";
 import Logger from "../../modules/Logger";
 import cookieParser from "cookie-parser";
 
+const path = require('path');
+
+const tourControllerPath = path.resolve(__dirname, '../../routers/controller/TOUR/*.ts');
+
+console.log(tourControllerPath);
+
 const app = express();
 
 export default async () => {
@@ -50,6 +56,32 @@ export default async () => {
         const {address, port} = server.address() as AddressInfo;
         Logger.info(Config.SERVER_TYPE + ' Server on ' + 'http://127.0.0.1:' + port)
     });
+
+    const swaggerJsdoc = require('swagger-jsdoc');
+    const swaggerUi = require('swagger-ui-express');
+
+    // Swagger 스펙 파일의 경로
+    const options = {
+        definition: {
+            openapi: '3.0.0',
+            info: {
+                title: 'Tour Service',
+                version: '1.0.0',
+            },
+        },
+        apis: [tourControllerPath], // Swagger 스펙을 작성할 파일들의 경로
+    };
+
+
+    const swaggerSpec = swaggerJsdoc(options);
+
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+    // Express 애플리케이션 시작
+    app.listen(Config.DOCS_PORT, () => {
+        Logger.info('Click!! API Docs --> ' + 'http://127.0.0.1:' + Config.DOCS_PORT + '/api-docs')
+    });
+
 
 
 }

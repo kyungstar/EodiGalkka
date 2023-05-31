@@ -34,11 +34,18 @@ import MQTT from "./ServerLoader/Target/MQTT";
         await MQTTLoader();
     }
 
-    // MQTT Messaging Protocol
+    // Tour Service
     if (["TOUR"].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading')
         await TOURLoader();
         await DBLoader();
+
+    }
+
+    // API Docs
+    if (["SWAGGER"].indexOf(Config.SERVER_TYPE) >= 0) {
+        Logger.info(Config.SERVER_TYPE + ' Is Loading')
+        await TOURLoader();
 
     }
 

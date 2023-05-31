@@ -13,9 +13,55 @@ import CountryService from "../../service/tour/country/CountryService";
 import CrawlerService from "../../service/tour/CrawlerService";
 
 
+/**
+ * @swagger
+ * tags:
+ *   name: Tour
+ *   description: Tour APIs
+ */
 
 class TourController extends ResController {
 
+    /**
+     * @swagger
+     * tags:
+     *   - name: Tour
+     *     description: Tour APIs
+     */
+
+    /**
+     * @swagger
+     * /api/tour/world/list:
+     *   post:
+     *     summary: Get the list of worlds
+     *     description: Get the list of worlds
+     *     tags: [Tour]
+     *     requestBody:
+     *       description: Optional request body
+     *       required: false
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               authType:
+     *                 type: string
+     *               email:
+     *                 type: string
+     *               loginId:
+     *                 type: string
+     *               authPwd:
+     *                 type: string
+     *     responses:
+     *       '200':
+     *         description: Success response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *       '400':
+     *         description: Bad Request
+     */
     public world = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
@@ -45,6 +91,46 @@ class TourController extends ResController {
 
     }
 
+    /**
+     * @swagger
+     * tags:
+     *   - name: Tour
+     *     description: Tour APIs
+     */
+
+    /**
+     * @swagger
+     * /api/tour/continents/list:
+     *   post:
+     *     summary: Get the list of worlds
+     *     description: Get the list of worlds
+     *     tags: [Tour]
+     *     requestBody:
+     *       description: Optional request body
+     *       required: false
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               authType:
+     *                 type: string
+     *               email:
+     *                 type: string
+     *               loginId:
+     *                 type: string
+     *               authPwd:
+     *                 type: string
+     *     responses:
+     *       '200':
+     *         description: Success response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *       '400':
+     *         description: Bad Request
+     */
     public continents = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
@@ -71,6 +157,46 @@ class TourController extends ResController {
 
     }
 
+    /**
+     * @swagger
+     * tags:
+     *   - name: Tour
+     *     description: Tour APIs
+     */
+
+    /**
+     * @swagger
+     * /api/tour/country/list:
+     *   post:
+     *     summary: Get the list of worlds
+     *     description: Get the list of worlds
+     *     tags: [Tour]
+     *     requestBody:
+     *       description: Optional request body
+     *       required: false
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               authType:
+     *                 type: string
+     *               email:
+     *                 type: string
+     *               loginId:
+     *                 type: string
+     *               authPwd:
+     *                 type: string
+     *     responses:
+     *       '200':
+     *         description: Success response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *       '400':
+     *         description: Bad Request
+     */
     public country = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
@@ -97,6 +223,45 @@ class TourController extends ResController {
 
     }
 
+    /**
+     * @swagger
+     * tags:
+     *   - name: Tour
+     *     description: Tour APIs
+     */
+    /**
+     * @swagger
+     * /api/tour/mod/country/list:
+     *   post:
+     *     summary: Get the list of worlds
+     *     description: Get the list of worlds
+     *     tags: [Tour]
+     *     requestBody:
+     *       description: Optional request body
+     *       required: false
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               authType:
+     *                 type: string
+     *               email:
+     *                 type: string
+     *               loginId:
+     *                 type: string
+     *               authPwd:
+     *                 type: string
+     *     responses:
+     *       '200':
+     *         description: Success response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *       '400':
+     *         description: Bad Request
+     */
     public crawlerCountry = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
