@@ -76,17 +76,17 @@ class TourController extends ResController {
         };
 
         if (typeof data == 'string') {
-            return this.clientReqError(res, data);
+            return this.clientReqError(req, res, data);
         }
 
         try {
 
             const worldList = await WorldService.worldList();
 
-            this.resultInterpreter(res, worldList);
+            this.resultInterpreter(req, res, worldList);
 
         } catch (err) {
-            this.errInterpreter(res, err);
+            this.errInterpreter(req, res, err);
         }
 
     }
@@ -142,17 +142,17 @@ class TourController extends ResController {
         };
 
         if (typeof data == 'string') {
-            return this.clientReqError(res, data);
+            return this.clientReqError(req, res, data);
         }
 
         try {
 
             const continentsList = await WorldService.continentsList(data.worldSeq);
 
-            this.resultInterpreter(res, continentsList);
+            this.resultInterpreter(req, res, continentsList);
 
         } catch (err) {
-            this.errInterpreter(res, err);
+            this.errInterpreter(req, res, err);
         }
 
     }
@@ -208,17 +208,17 @@ class TourController extends ResController {
         };
 
         if (typeof data == 'string') {
-            return this.clientReqError(res, data);
+            return this.clientReqError(req, res, data);
         }
 
         try {
 
             const countryList = await CountryService.countryList(data.continentsSeq);
 
-            this.resultInterpreter(res, countryList);
+            this.resultInterpreter(req, res, countryList);
 
         } catch (err) {
-            this.errInterpreter(res, err);
+            this.errInterpreter(req, res, err);
         }
 
     }
@@ -277,17 +277,17 @@ class TourController extends ResController {
 
 
         if (typeof data == 'string') {
-            return this.clientReqError(res, data);
+            return this.clientReqError(req, res, data);
         }
 
         try {
 
             const countryList = await CrawlerService.crawlerList(data.countrySeq, data.sort, data.page);
 
-            this.resultInterpreter(res, countryList);
+            this.resultInterpreter(req, res, countryList);
 
         } catch (err) {
-            this.errInterpreter(res, err);
+            this.errInterpreter(req, res, err);
         }
 
     }
