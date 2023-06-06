@@ -8,6 +8,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Logger_1 = __importDefault(require("../modules/Logger"));
 const ResController_1 = __importDefault(require("../routers/controller/ResController"));
+const config_1 = __importDefault(require("../../config"));
 const escape = require('sqlstring').escape;
 class QueryMaker extends ResController_1.default {
     constructor() {
@@ -34,9 +35,9 @@ class QueryMaker extends ResController_1.default {
                 Logger_1.default.debug('Query Insert Fail');
             }
         };
-        // todo 수정해야함
-        this.Select = (tblName, selectObj, selectList) => {
+        this.Select = (tblName, selectObj, decryptSelectObj, selectList) => {
             try {
+                let decryptQuery = "";
                 let query = " SELECT ";
                 for (let item of selectList) {
                     query += item + ',';
@@ -45,6 +46,9 @@ class QueryMaker extends ResController_1.default {
                 query += " " +
                     "   FROM " + tblName +
                     "   WHERE 1 = 1 ";
+                for (let k in decryptSelectObj) {
+                    query += ` AND CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g, "") + escape(config_1.default.DB.encrypt_key) + ") USING utf8) = " + escape(decryptSelectObj[k]);
+                }
                 for (let k in selectObj) {
                     if (selectObj[k][0] === '\\')
                         query += " AND " + k + selectObj[k].slice(1, selectObj[k].length);
@@ -113,7 +117,7 @@ class QueryMaker extends ResController_1.default {
                 return query;
             }
             catch (err) {
-                Logger_1.default.debug('Query Select Fail');
+                Logger_1.default.debug(err);
             }
         };
     }

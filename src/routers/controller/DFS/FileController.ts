@@ -7,8 +7,8 @@ const sharp = require('sharp')
 import * as CryptoJS from 'crypto-js';
 
 import Logger from "../../../modules/Logger";
-import Config from "../../../../Config";
-import DataChecker from "../../Util/DataChecker";
+import Config from "../../../../config";
+import DataChecker from "../../util/DataChecker";
 import {getConnection} from "typeorm";
 import ResController from "../ResController";
 
@@ -55,11 +55,10 @@ class FileController extends ResController {
             await sharp(dir + "/" + fileName).resize(200, 200).toFile(dir + "/" + fileThumbName);
 
 
-
-            return this.true(res, 'SU1');
+            await this.resultInterpreter(req, res, fs);
 
         } catch (err) {
-            return this.err(res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -81,37 +80,6 @@ class FileController extends ResController {
 
         } catch(err) {
             Logger.info(err + ' Caused On Error')
-        }
-    }
-
-    public imageDownBySeq = async (req: Request, res: Response) => {
-        Logger.info("Call API - " + req.originalUrl);
-
-        try {
-
-            let data = DataChecker.mergeObject(
-                DataChecker.stringArrCheck(res, req.query, ['fileSeq', 'fileType'], true)
-            ) as {
-                fileSeq: number,
-            }
-            console.log(data.fileSeq);
-
-
-   /*         //const downloadPath = Config.DEFAULT_FILE_PATH + "/" + data.filePath;
-            const fileRepository = getConnection().getRepository(ygFile);
-            const fileData = await fileRepository.findOne({ where: { file_seq: data.fileSeq } });
-
-            if(!fileData)
-                return this.false(res, 'NF0');
-*/
-            const dir = Config.DEFAULT_FILE_PATH
-           /* const downloadPath = dir + fileData.file_path;
-
-            res.download(downloadPath);
-*/
-        } catch(err) {
-            Logger.info(err + ' Caused On Error')
-            this.err(res, err);
         }
     }
 

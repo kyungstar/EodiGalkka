@@ -7,13 +7,18 @@ import MongoLogging from "../../middlewares/MongoLogging";
 
 export default class ResController {
 
-    public errInterpreter(req: Request, res: express.Response, err: string) {
+    public async errInterpreter(req: Request, res: express.Response, err: string) {
+
+        // Mongo Log
+        res.locals.data = err;
+        await MongoLogging(req, res);
 
         try {
-            this.err(res, err);
+            Logger.error(err + ' Caused On Error');
+            await this.err(req, res, err);
 
         } catch (err) {
-            this.err(res, err);
+            await this.err(req, res, err);
         }
 
     }
@@ -45,31 +50,36 @@ export default class ResController {
 
     public async resultInterpreter(req: Request, res: express.Response, apiResponse: Object) {
 
+        // Mongo Log
         res.locals.data = apiResponse;
-
         await MongoLogging(req, res);
 
         if (typeof apiResponse === 'object') {
 
             if ((apiResponse as { result: any }).result === false)
-                return this.false(res, apiResponse);
+                return this.false(req, res, apiResponse);
             else
-                return this.true(res, apiResponse)
+                return this.true(req, res, apiResponse)
 
         } else {
-            return this.false(res, apiResponse);
+            return this.false(req, res, apiResponse);
         }
 
     }
 
     // T는 Type의 약자로 다른 언어에서도 제네릭을 선언할 때 관용적으로 많이 사용된다. 이 부분에는 식별자로 사용할 수 있는 것이라면 무엇이든 들어갈 수 있다.
-    public clientReqError<T>(req: Request, res: express.Response, msg: string) {
+    public async clientReqError<T>(req: Request, res: express.Response, msg: string) {
+
 
         let dto = {
             result: false,
             code: 'CUP',
-            msg:  msg
+            msg: msg
         };
+
+        // Mongo Log
+        res.locals.data = dto;
+        await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);
@@ -77,13 +87,17 @@ export default class ResController {
     }
 
 
-    public dataCheck<T>(res: express.Response, data: any, msg: string) {
+    public async dataCheck<T>(req: Request, res: express.Response, data: any, msg: string) {
 
         let dto = {
             result: false,
             msg: data + msg
         };
 
+        // Mongo Log
+        res.locals.data = dto;
+        await MongoLogging(req, res);
+
 
         res.type('application/json');
         return res.status(200).json(dto);
@@ -92,7 +106,7 @@ export default class ResController {
 
 
 
-    public true<T>(res: express.Response, dto?: T) {
+    public async true<T>(req: Request, res: express.Response, dto?: T) {
 
         if (!dto) { // @ts-ignore
             dto = {};
@@ -101,13 +115,17 @@ export default class ResController {
         // @ts-ignore
         dto.result = true;
 
+        // Mongo Log
+        res.locals.data = dto;
+        await MongoLogging(req, res);
+
         res.type('application/json');
 
         return res.status(200).json(dto);
 
     }
 
-    public false<T>(res: express.Response, dto?: T) {
+    public async false<T>(req: Request, res: express.Response, dto?: T) {
 
         if (!dto) { // @ts-ignore
             dto = {};
@@ -118,13 +136,17 @@ export default class ResController {
 
         res.type('application/json');
 
+        // Mongo Log
+        res.locals.data = dto;
+        await MongoLogging(req, res);
+
         return res.status(200).json(dto);
 
     }
 
 
 
-    public err<T>(res: express.Response, err: string) {
+    public async err<T>(req: Request, res: express.Response, err: string) {
 
         let dto = {
             result: false,
@@ -133,6 +155,10 @@ export default class ResController {
         };
 
         Logger.error(err + ' is Occurred')
+
+        // Mongo Log
+        res.locals.data = dto;
+        await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);

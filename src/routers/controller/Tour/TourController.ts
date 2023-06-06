@@ -28,7 +28,6 @@ class TourController extends ResController {
      *   - name: Tour
      *     description: Tour APIs
      */
-
     /**
      * @swagger
      * /api/tour/world/list:
@@ -83,10 +82,10 @@ class TourController extends ResController {
 
             const worldList = await WorldService.worldList();
 
-            this.resultInterpreter(req, res, worldList);
+            await this.resultInterpreter(req, res, worldList);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -97,7 +96,6 @@ class TourController extends ResController {
      *   - name: Tour
      *     description: Tour APIs
      */
-
     /**
      * @swagger
      * /api/tour/continents/list:
@@ -149,10 +147,10 @@ class TourController extends ResController {
 
             const continentsList = await WorldService.continentsList(data.worldSeq);
 
-            this.resultInterpreter(req, res, continentsList);
+            await this.resultInterpreter(req, res, continentsList);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -163,7 +161,6 @@ class TourController extends ResController {
      *   - name: Tour
      *     description: Tour APIs
      */
-
     /**
      * @swagger
      * /api/tour/country/list:
@@ -215,10 +212,10 @@ class TourController extends ResController {
 
             const countryList = await CountryService.countryList(data.continentsSeq);
 
-            this.resultInterpreter(req, res, countryList);
+            await this.resultInterpreter(req, res, countryList);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -284,10 +281,10 @@ class TourController extends ResController {
 
             const countryList = await CrawlerService.crawlerList(data.countrySeq, data.sort, data.page);
 
-            this.resultInterpreter(req, res, countryList);
+            await this.resultInterpreter(req, res, countryList);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }

@@ -1,6 +1,6 @@
 "use strict";
 /**
- * Created by 유희찬 on 2020-07-16.
+ * Created by 유희찬 on 2023-05-26.
  */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -55,6 +55,24 @@ class MariaDB {
             }
         });
     }
+    getList(statement) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let conn = yield this.getConnection();
+            try {
+                let result = yield conn.query(statement.trim());
+                Logger_1.default.debug("Query result - " + (!!result));
+                Logger_1.default.debug(statement);
+                yield conn.commit();
+                yield conn.release();
+                return result;
+            }
+            catch (err) {
+                Logger_1.default.debug('Query Select Fail', err);
+                yield conn.release();
+                return null;
+            }
+        });
+    }
     get(statement) {
         return __awaiter(this, void 0, void 0, function* () {
             let conn = yield this.getConnection();
@@ -92,6 +110,7 @@ class MariaDB {
             catch (err) {
                 yield conn.rollback();
                 yield conn.release();
+                Logger_1.default.error(err);
                 return null;
             }
         });

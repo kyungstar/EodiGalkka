@@ -17,50 +17,40 @@ const Logger_1 = __importDefault(require("../../../modules/Logger"));
 const DataChecker_1 = __importDefault(require("../../util/DataChecker"));
 const UserService_1 = __importDefault(require("../../service/user/UserService"));
 const MailService_1 = __importDefault(require("../../service/mail/MailService"));
+const MqttExecuter_1 = __importDefault(require("../../service/mqtt/MqttExecuter"));
 class UserController extends ResController_1.default {
     constructor() {
         super(...arguments);
         this.userAuth = (req, res) => __awaiter(this, void 0, void 0, function* () {
             Logger_1.default.info("Call API - " + req.originalUrl);
-            let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, [
-                "loginId", "authType", "authPwd"
-            ]));
+            let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ["authType", "authPwd"]), DataChecker_1.default.stringArrCheck(res, req.body, ["loginId", "email"], false));
             if (typeof data == 'string') {
-                return this.clientReqError(res, data);
+                return this.clientReqError(req, res, data);
             }
             try {
-                const userData = yield UserService_1.default.checkUserAuth(data.loginId, data.authType, data.authPwd);
-                if (userData)
-                    this.true(res, 'AS0');
-                else
-                    this.false(res, 'AF0');
+                const userData = yield UserService_1.default.checkUserAuth(data.loginId, data.email, data.authType, data.authPwd);
+                // MqttExecuter 클래스의 인스턴스 생성
+                const mqttExecuter = new MqttExecuter_1.default();
+                MqttExecuter_1.default.publishMessage('C/2/H/2', "hello");
+                yield this.resultInterpreter(req, res, userData);
             }
             catch (err) {
+                yield this.errInterpreter(req, res, err);
             }
         });
         this.sendAuth = (req, res) => __awaiter(this, void 0, void 0, function* () {
             Logger_1.default.info("Call API - " + req.originalUrl);
-            let data = DataChecker_1.default.mergeObject(DataChecker_1.default.stringArrCheck(res, req.body, [
-                "loginId", "authType"
-            ], true));
+            let data = DataChecker_1.default.mergeObject(DataChecker_1.default.stringArrCheck(res, req.body, ["authType"], true), DataChecker_1.default.stringArrCheck(res, req.body, ["loginId", "email"], false));
             if (typeof data == 'string') {
-                return this.clientReqError(res, data);
+                return this.clientReqError(req, res, data);
             }
-            const userData = yield UserService_1.default.getUserData(data.loginId);
-            if (!userData) {
-                this.false(res, '01');
-                return;
+            try {
+                const mailResult = yield MailService_1.default.authEmail(data.authType, data.loginId, data.email);
+                this.resultInterpreter(req, res, mailResult);
             }
-            const userAuthData = yield UserService_1.default.getUserAuthData(data.loginId, data.authType);
-            if (!userAuthData) {
-                this.false(res, '01');
-                return;
+            catch (err) {
+                this.errInterpreter(req, res, err);
             }
-            const mailResult = yield MailService_1.default.authEmail(userData.email, data.authType, userAuthData.cotents);
-            if (mailResult.accepted[0].includes(userData.email))
-                this.true(res, 'UA0');
-            else
-                this.false(res, 'UA1');
         });
         this.userJoin = (req, res) => __awaiter(this, void 0, void 0, function* () {
             Logger_1.default.info("Call API - " + req.originalUrl);
@@ -69,93 +59,92 @@ class UserController extends ResController_1.default {
             ]), DataChecker_1.default.stringArrCheck(res, req.body, [
                 "address", "addressDetail", "nickName"
             ], false));
-            if (typeof data == 'string') {
-                return this.clientReqError(res, data);
+            try {
+                if (typeof data == 'string') {
+                    return this.clientReqError(req, res, data);
+                }
+                let userJoinResult = yield UserService_1.default.Join(data.loginId, data.pwd, data.userType, data.email, data.name, data.nickName, data.phoneNumber, data.gender, data.address, data.addressDetail);
+                this.resultInterpreter(req, res, userJoinResult);
             }
-            let result = yield UserService_1.default.Join(data.loginId, data.pwd, data.userType, data.email, data.name, data.nickName, data.phoneNumber, data.gender, data.address, data.addressDetail);
-            if (!result)
-                return this.false(res, 'LA');
-            const mailResult = yield MailService_1.default.authEmail(data.email, 'USER_JOIN', result.contents);
-            if (mailResult.accepted[0].includes(data.email))
-                this.true(res, 'UA0');
-            else
-                this.false(res, 'UA1');
+            catch (err) {
+                this.errInterpreter(req, res, err);
+            }
         });
         this.userLogin = (req, res) => __awaiter(this, void 0, void 0, function* () {
             Logger_1.default.info("Call API - " + req.originalUrl);
             let data = DataChecker_1.default.mergeObject(DataChecker_1.default.stringArrCheck(res, req.body, ["loginId", "pwd"], true));
             if (typeof data == 'string') {
-                return this.clientReqError(res, data);
+                return this.clientReqError(req, res, data);
             }
-            Logger_1.default.info('?');
-            let accessInfo = yield UserService_1.default.Access(res, data.loginId, data.pwd);
-            // 세션 등록 추가
-            if (accessInfo)
-                return this.true(res, 'TS1', { token: accessInfo });
-            else
-                return this.false(res, accessInfo.message);
+            try {
+                let accessInfo = yield UserService_1.default.Access(res, data.loginId, data.pwd);
+                this.resultInterpreter(req, res, accessInfo);
+            }
+            catch (err) {
+                this.errInterpreter(req, res, err);
+            }
         });
         this.userEmail = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['email']));
-                let result = yield UserService_1.default.emailCheck(data.email);
-                if (result)
-                    return this.true(res, '01');
-                else
-                    return this.false(res, '01');
+                if (typeof data == 'string') {
+                    return this.clientReqError(req, res, data);
+                }
+                let emailCheckResult = yield UserService_1.default.emailCheck(data.email);
+                this.resultInterpreter(req, res, emailCheckResult);
             }
             catch (err) {
-                Logger_1.default.debug(err + 'is Occured');
-                return this.err(res, 'A01', err);
+                this.errInterpreter(req, res, err);
             }
         });
         this.userPhone = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['phoneNumber']));
-                //todo 전화번호 추가 작업 필요
-                let result = yield UserService_1.default.phoneCheck(data.phoneNumber);
-                if (result)
-                    return this.true(res, '01');
-                else
-                    return this.false(res, '01');
+                if (typeof data == 'string') {
+                    this.clientReqError(req, res, data);
+                }
+                let phoneCheckResult = yield UserService_1.default.phoneCheck(data.phoneNumber);
+                this.resultInterpreter(req, res, phoneCheckResult);
             }
             catch (err) {
-                Logger_1.default.debug(err + ' is Occured');
-                return this.err(res, 'A01', err);
+                this.errInterpreter(req, res, err);
             }
         });
         this.resetPw = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['loginId', 'originPwd', 'newPwd']));
+                let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['newPwd']), DataChecker_1.default.loadJWTValue(req.body));
                 if (typeof data == 'string') {
-                    return this.clientReqError(res, data);
+                    return this.clientReqError(req, res, data);
                 }
-                let updateResult = yield UserService_1.default.updatePwd(data.loginId, data.originPwd, data.newPwd);
-                /*     if (updateResult.result)
-                         this.true(res, updateResult);
-                     else
-                         this.false(res, updateResult);*/
+                let userPwdUpdate = yield UserService_1.default.updatePwd(data.userId, data.newPwd);
+                this.resultInterpreter(req, res, userPwdUpdate);
             }
             catch (err) {
-                Logger_1.default.debug(err + 'is Occured');
-                return this.err(res, 'A01', err);
+                this.errInterpreter(req, res, err);
+            }
+        });
+        this.authPw = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['loginId', 'pwd']));
+                if (typeof data == 'string') {
+                    return this.clientReqError(req, res, data);
+                }
+                let userPwdAuth = yield UserService_1.default.authPwd(data.loginId, data.pwd);
+                this.resultInterpreter(req, res, userPwdAuth);
+            }
+            catch (err) {
+                this.errInterpreter(req, res, err);
             }
         });
         this.updateUser = (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['loginId']), DataChecker_1.default.stringArrCheck(res, req.body, ['email', 'phoneNumber', 'address', 'addressDetail'], false));
                 if (typeof data == 'string') {
-                    return this.clientReqError(res, data);
+                    return this.clientReqError(req, res, data);
                 }
-                let result = yield UserService_1.default.updateUser(data.loginId, data.email, data.phoneNumber, data.address, data.addressDetail);
-                if (result)
-                    this.true(res, '01');
-                else
-                    this.false(res, '02');
             }
             catch (err) {
-                Logger_1.default.debug(err + 'is Occured');
-                return this.err(res, 'A01', err);
+                this.errInterpreter(req, res, err);
             }
         });
     }

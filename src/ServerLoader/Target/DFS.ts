@@ -2,7 +2,7 @@ import express from "express";
 import {AddressInfo} from "net";
 import formData from "express-form-data";
 
-import Config from "../../../Config";
+import Config from "../../../config";
 import router from "../../Routers/Controller";
 import Logger from "../../modules/Logger";
 import cookieParser from "cookie-parser";
