@@ -2,10 +2,10 @@ import {Router} from "express";
 import express from "express";
 const router = express.Router();
 
-import Config from "../../../../Config";
+import Config from "../../../../config";
 
-import TourController from "../TOUR/TourController";
-import BoardController from "../TOUR/BoardController";
+import TourController from ".//TourController";
+import BoardController from ".//BoardController";
 
 
 

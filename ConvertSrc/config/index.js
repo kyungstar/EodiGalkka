@@ -15,11 +15,15 @@ if (envFound.error) {
 var ServerEnum;
 (function (ServerEnum) {
     ServerEnum["WAS"] = "WAS";
+    ServerEnum["DFS"] = "DFS";
 })(ServerEnum = exports.ServerEnum || (exports.ServerEnum = {}));
 class Config {
     constructor() {
         // Global
         this.PORT = parseInt(process.env.PORT, 10);
+        this.DOCS_PORT = parseInt(process.env.DOCS_PORT, 10);
+        this.MQTT_HOST = process.env.MQTT_HOST;
+        this.MONGO_URL = process.env.MONGO_URL;
         this.SERVER_TYPE = process.env.SERVER_TYPE;
         this.DEFAULT_FILE_PATH = process.env.DEFAULT_FILE_PATH;
         this.FILE_SIZE = parseInt(process.env.FILE_SIZE);

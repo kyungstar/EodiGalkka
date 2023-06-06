@@ -11,7 +11,5 @@ const router = express_1.default.Router();
 router.post("/img/upload", FileController_1.default.imageUpload);
 // 이미지 다운로드
 router.get("/img/download", FileController_1.default.imageDown);
-// fileSeq로 이미지 다운로드
-router.get("/download", FileController_1.default.imageDownBySeq);
 exports.default = router;
 //# sourceMappingURL=index.js.map

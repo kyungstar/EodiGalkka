@@ -1,7 +1,7 @@
 /**
  * Created By 강영규 On 2022-11-13
  */
-import ResController from "../Controller/ResController";
+import ResController from "../controller/ResController";
 import express from "express";
 
 class DataChecker extends ResController {
@@ -14,6 +14,7 @@ class DataChecker extends ResController {
             userType: objData.userType
         }
     }
+/*
 
     // 토큰 관리자 검증하기
     public loadJWTAdminCheck(res: any, objData: any) {
@@ -28,6 +29,7 @@ class DataChecker extends ResController {
         if (objData.userType !== 'USER' && objData.userType !== 'ADMIN')
             return this.false(res, 'U01');
     }
+*/
 
 
     // 필수 값 검증
