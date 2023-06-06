@@ -2,6 +2,8 @@ import ResController from "../../controller/ResController";
 import Config from "../../../../config"
 import DB from "../../../modules/Mysql";
 import QM from "../../../modules/QueryMaker";
+import {createToken, JwtModel} from "../../../middlewares/JwtAuth";
+import ResultBox from "../../dto/ResultBox";
 
 const Axios = require('axios');
 const moment = require('moment');
@@ -10,7 +12,7 @@ const CryptoJS = require('crypto-js');
 const smsDate = moment().format('YYYYMMDDHHMMss');
 
 
-export default class PayService extends ResController {
+export default class PayService extends ResultBox {
 
     public static async ready(userId: string, phone: string) {
 
@@ -26,9 +28,6 @@ export default class PayService extends ResController {
             if(!userData)
                 return null;
 
-
-            //todo 결제후 결제정보 return 필요함.
-
             let result = await DB.Executer(QM.Insert("t_node_pay",{
                 user_id: userData.user_id,
                 phone: userData.phone_number,
@@ -37,10 +36,11 @@ export default class PayService extends ResController {
                 order_status: 'READY'
             }))
 
-            if(result)
-                return result
-            else
-                return null;
+            if (result) {
+                return this.ObjTrue('01', [{poSeq: result.insertId}]);
+            } else {
+                return this.JustFalse('01');
+            }
 
 
         } catch (err) {
@@ -48,7 +48,7 @@ export default class PayService extends ResController {
         }
     }
 
-    // todo DB 추가해야함
+
     public static async smsPay(res: any, ordNm: string, ordHpNo: string, mid: string,
         usrId: string, sid: string, goodsNm: string, goodsAmt: number) {
 
@@ -79,7 +79,11 @@ export default class PayService extends ResController {
                 }
             });
 
-            return result;
+            if (result) {
+                return this.ObjTrue('01', [{result: result}]);
+            } else {
+                return this.JustFalse('01');
+            }
 
         } catch (err) {
             return err;
@@ -114,9 +118,11 @@ export default class PayService extends ResController {
             });
 
 
-            //todo 결제 추가 작업 필요함
-
-            return result;
+            if (result) {
+                return this.ObjTrue('01', [{result: result}]);
+            } else {
+                return this.JustFalse('01');
+            }
 
         } catch (err) {
             return err;

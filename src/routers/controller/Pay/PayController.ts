@@ -17,12 +17,18 @@ class PayController extends ResController {
             phone: string
         };
 
-        let result = await PayService.ready(data.userId, data.phone);
+        try {
+            let payReadyResult = await PayService.ready(data.userId, data.phone);
 
-        if(result)
-            return this.true(res, 'PRS0', {paySeq: result.insertId})
-        else
-            return this.false(res, 'PRF0')
+            await this.resultInterpreter(req, res, payReadyResult);
+
+        } catch (err) {
+
+            await this.errInterpreter(req, res, err);
+
+        }
+
+
     }
 
 
@@ -36,6 +42,8 @@ class PayController extends ResController {
 
 
     }
+
+
 
     // 문자 결제
     public sms = async (req: Request, res: Response) => {
@@ -52,16 +60,16 @@ class PayController extends ResController {
             goodsAmt: number
         };
 
+        try {
 
-        // sms 결제 준비
-        let result = await PayService.smsPay(res, data.ordNm, data.ordHpNo, data.mid, data.usrId, data.sid, data.goodsNm, data.goodsAmt);
+            // sms 문자 결제
+            let smsPaySendResult = await PayService.smsPay(res, data.ordNm, data.ordHpNo, data.mid, data.usrId, data.sid, data.goodsNm, data.goodsAmt);
 
-        // result 결제 준비 처리 필요함
+            await this.resultInterpreter(req, res, smsPaySendResult);
 
-        if(result)
-            return this.true(res, 'SC1');
-        else
-            return this.false(res, 'SF1')
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
 
     }
 
@@ -77,13 +85,16 @@ class PayController extends ResController {
             sid: string,
         };
 
-        // sms 결제 내역 조회
-        let result = await PayService.smsPayResult(res, data.mid, data.usrId, data.sid, data.reqId);
+        try {
+            // sms 결제 내역 조회
+            let smsPayResult = await PayService.smsPayResult(res, data.mid, data.usrId, data.sid, data.reqId);
 
-        if(result)
-            return this.true(res, 'S01', {result: result});
-        else
-            return this.false(res, 'S01')
+            await this.resultInterpreter(req, res, smsPayResult);
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
 
     }
 

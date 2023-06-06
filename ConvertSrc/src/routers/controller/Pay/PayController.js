@@ -21,11 +21,13 @@ class PayController extends ResController_1.default {
         // 결제 데이터 저장
         this.ready = (req, res) => __awaiter(this, void 0, void 0, function* () {
             let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['phone']));
-            let result = yield PayService_1.default.ready(data.userId, data.phone);
-            if (result)
-                return this.true(res, 'PRS0', { paySeq: result.insertId });
-            else
-                return this.false(res, 'PRF0');
+            try {
+                let payReadyResult = yield PayService_1.default.ready(data.userId, data.phone);
+                yield this.resultInterpreter(req, res, payReadyResult);
+            }
+            catch (err) {
+                yield this.errInterpreter(req, res, err);
+            }
         });
         // 결제 취소
         this.cancel = (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -36,23 +38,26 @@ class PayController extends ResController_1.default {
             let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, [
                 'ordNm', 'ordHpNo', 'goodsNm', 'goodsAmt', 'mid', 'usrId', 'sid'
             ]));
-            // sms 결제 준비
-            let result = yield PayService_1.default.smsPay(res, data.ordNm, data.ordHpNo, data.mid, data.usrId, data.sid, data.goodsNm, data.goodsAmt);
-            // result 결제 준비 처리 필요함
-            if (result)
-                return this.true(res, 'SC1');
-            else
-                return this.false(res, 'SF1');
+            try {
+                // sms 문자 결제
+                let smsPaySendResult = yield PayService_1.default.smsPay(res, data.ordNm, data.ordHpNo, data.mid, data.usrId, data.sid, data.goodsNm, data.goodsAmt);
+                yield this.resultInterpreter(req, res, smsPaySendResult);
+            }
+            catch (err) {
+                yield this.errInterpreter(req, res, err);
+            }
         });
         // 문자 결제 내역 조회
         this.smsResult = (req, res) => __awaiter(this, void 0, void 0, function* () {
             let data = DataChecker_1.default.mergeObject(DataChecker_1.default.needArrCheck(res, req.body, ['mid', 'usrId', 'sid', 'reqId']));
-            // sms 결제 내역 조회
-            let result = yield PayService_1.default.smsPayResult(res, data.mid, data.usrId, data.sid, data.reqId);
-            if (result)
-                return this.true(res, 'S01', { result: result });
-            else
-                return this.false(res, 'S01');
+            try {
+                // sms 결제 내역 조회
+                let smsPayResult = yield PayService_1.default.smsPayResult(res, data.mid, data.usrId, data.sid, data.reqId);
+                yield this.resultInterpreter(req, res, smsPayResult);
+            }
+            catch (err) {
+                yield this.errInterpreter(req, res, err);
+            }
         });
     }
 }

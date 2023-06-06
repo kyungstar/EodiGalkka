@@ -12,25 +12,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ResController_1 = __importDefault(require("../../controller/ResController"));
 const config_1 = __importDefault(require("../../../../config"));
 const Mysql_1 = __importDefault(require("../../../modules/Mysql"));
 const QueryMaker_1 = __importDefault(require("../../../modules/QueryMaker"));
+const ResultBox_1 = __importDefault(require("../../dto/ResultBox"));
 const Axios = require('axios');
 const moment = require('moment');
 const CryptoJS = require('crypto-js');
 const smsDate = moment().format('YYYYMMDDHHMMss');
-class PayService extends ResController_1.default {
+class PayService extends ResultBox_1.default {
     static ready(userId, phone) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let userData = yield Mysql_1.default.getOne(QueryMaker_1.default.Select("t_node_user", {
                     user_id: userId,
                     phone: phone
-                }, ["*"]));
+                }, {}, ["*"]));
                 if (!userData)
                     return null;
-                //todo 결제후 결제정보 return 필요함.
                 let result = yield Mysql_1.default.Executer(QueryMaker_1.default.Insert("t_node_pay", {
                     user_id: userData.user_id,
                     phone: userData.phone_number,
@@ -38,17 +37,18 @@ class PayService extends ResController_1.default {
                     pay_status: 'READY',
                     order_status: 'READY'
                 }));
-                if (result)
-                    return result;
-                else
-                    return null;
+                if (result) {
+                    return this.ObjTrue('01', [{ poSeq: result.insertId }]);
+                }
+                else {
+                    return this.JustFalse('01');
+                }
             }
             catch (err) {
                 return err;
             }
         });
     }
-    // todo DB 추가해야함
     static smsPay(res, ordNm, ordHpNo, mid, usrId, sid, goodsNm, goodsAmt) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -75,7 +75,12 @@ class PayService extends ResController_1.default {
                         'Content-type': 'application/json', 'charset': 'utf-8'
                     }
                 });
-                return result;
+                if (result) {
+                    return this.ObjTrue('01', [{ result: result }]);
+                }
+                else {
+                    return this.JustFalse('01');
+                }
             }
             catch (err) {
                 return err;
@@ -106,8 +111,12 @@ class PayService extends ResController_1.default {
                         'Content-type': 'application/json', 'charset': 'utf-8'
                     }
                 });
-                //todo 결제 추가 작업 필요함
-                return result;
+                if (result) {
+                    return this.ObjTrue('01', [{ result: result }]);
+                }
+                else {
+                    return this.JustFalse('01');
+                }
             }
             catch (err) {
                 return err;
