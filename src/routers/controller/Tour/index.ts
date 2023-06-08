@@ -17,12 +17,19 @@ router.post("/world/list", TourController.world);
 // 세계 리스트
 router.post("/continents/list", TourController.continents);
 
-// 도시 리스트
+
+// --------------------------------------------------------------------
+
+// 나라 리스트
 router.post("/country/list", TourController.country);
 
-// 네이버최저가 도시 리스트
+// 네이버최저가 나라 리스트
 router.post("/mod/country/list", TourController.crawlerCountry);
 
+// --------------------------------------------------------------------
+
+// 도시 리스트
+router.post("/city/list", TourController.cityList);
 
 
 export default router;

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Mongo from "../modules/Mongo";
 import Logger from "../modules/Logger";
+import Config from "../../config";
 
 
 
@@ -16,7 +17,7 @@ const logger = async (req: Request, res: Response) => {
         throw new Error('DB connection is not available');
     }
 
-    const collection = db.collection('log_reply_user');
+    const collection = db.collection('log_reply_' + Config.SERVER_TYPE.toLowerCase());
 
     const log = {
         method,

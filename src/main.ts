@@ -21,7 +21,7 @@ import MQTT from "./ServerLoader/Target/MQTT";
     }
 
     // Tour Service
-    if (["Tour"].indexOf(Config.SERVER_TYPE) >= 0) {
+    if (["TOUR"].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading')
         await TOURLoader();
         await DBLoader();
