@@ -8,9 +8,19 @@ import cheerio from 'cheerio';
 
 export default class WorldService extends ResultBox {
 
-    public static async crawlerList(countrySeq: number, sort: string, page: number) {
+    public static async crawlerList(travelSeq: number, targetKeyword: string, sort: string, page: number) {
 
         try {
+
+            const travelCountUpdateResult = await DB.Executer(QM.Update("t_travel",{
+                today_view_cnt: '\\today_view_cnt + 1',
+                total_view_cnt: '\\total_view_cnt + 1',
+            },{
+                travel_seq: travelSeq
+            }));
+
+            if(!travelCountUpdateResult)
+                return this.JustFalse('TN0');
 
             interface Item {
                 itemSeq: number;
@@ -21,12 +31,8 @@ export default class WorldService extends ResultBox {
                 mobileItemPrice: number;
             }
 
-            let continentsData = await DB.getOne(QM.Select("t_country",{country_seq: countrySeq},{}, ["*"]));
 
-            if(!continentsData)
-                return this.JustFalse('CN0');
-
-            let target = encodeURIComponent(continentsData.country_name + '패키지');
+            let target = encodeURIComponent(targetKeyword);
 
             const targetUrl =
                 `https://search.shopping.naver.com/search/all?frm=NVSCTAB&origQuery=${target}&pagingIndex=${page}&productSet=total&query=${target}&sort=${sort}&timestamp=&viewType=list`;

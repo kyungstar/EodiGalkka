@@ -264,13 +264,13 @@ class TourController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["countrySeq"]),
-            DataChecker.stringArrCheck(res, req.body, ["sort"], true),
-            DataChecker.numberArrCheck(res, req.body, ["page"], 1, false)
+            DataChecker.needArrCheck(res, req.body, ["travelSeq", "targetKeyword", "sort"]),
+            DataChecker.numberArrCheck(res, req.body, ["page"], 1, false),
         ) as {
-            countrySeq: number,
-            page: number,
-            sort: string
+            travelSeq: number,
+            targetKeyword: string,
+            sort: string,
+            page: number
         };
 
 
@@ -280,7 +280,7 @@ class TourController extends ResController {
 
         try {
 
-            const countryList = await CrawlerService.crawlerList(data.countrySeq, data.sort, data.page);
+            const countryList = await CrawlerService.crawlerList(data.travelSeq, data.targetKeyword, data.sort, data.page);
 
             await this.resultInterpreter(req, res, countryList);
 

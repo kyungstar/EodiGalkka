@@ -6,6 +6,7 @@ import Config from "../../../../config";
 
 import TourController from ".//TourController";
 import BoardController from ".//BoardController";
+import TravelController from "./TravelController";
 
 
 
@@ -31,5 +32,9 @@ router.post("/mod/country/list", TourController.crawlerCountry);
 // 도시 리스트
 router.post("/city/list", TourController.cityList);
 
+// --------------------------------------------------------------------
+
+// 여행 리스트
+router.post("/travel/list", TravelController.travel);
 
 export default router;
