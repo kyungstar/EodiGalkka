@@ -63,7 +63,7 @@ class TravelController extends ResController {
      *       '400':
      *         description: Bad Request
      */
-    public travel = async (req: Request, res: Response) => {
+    public travelList = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
@@ -80,7 +80,71 @@ class TravelController extends ResController {
 
         try {
 
-            const travelList = await TravelService.travelList(data.targetSeq, data.targetType);
+            const travelList = await TravelService.getTravelList(data.targetSeq, data.targetType);
+
+            await this.resultInterpreter(req, res, travelList);
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
+    }
+
+    /**
+     * @swagger
+     * tags:
+     *   - name: Travel
+     *     description: Travel APIs
+     */
+    /**
+     * @swagger
+     * /api/tour/travel/list:
+     *   post:
+     *     summary: Get the list of worlds
+     *     description: Get the list of worlds
+     *     tags: [Tour]
+     *     requestBody:
+     *       description: Optional request body
+     *       required: false
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               authType:
+     *                 type: string
+     *               email:
+     *                 type: string
+     *               loginId:
+     *                 type: string
+     *               authPwd:
+     *                 type: string
+     *     responses:
+     *       '200':
+     *         description: Success response
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *       '400':
+     *         description: Bad Request
+     */
+    public popularTravleList = async (req: Request, res: Response) => {
+        Logger.info("Call API - " + req.originalUrl);
+
+        let data = DataChecker.mergeObject(
+            DataChecker.stringArrCheck(res, req.body, ['targetType'], false)
+        ) as {
+            targetType: string
+        };
+
+        if (typeof data == 'string') {
+            return this.clientReqError(req, res, data);
+        }
+
+        try {
+
+            const travelList = await TravelService.getPopularTravleList(data.targetType);
 
             await this.resultInterpreter(req, res, travelList);
 

@@ -35,6 +35,9 @@ router.post("/city/list", TourController.cityList);
 // --------------------------------------------------------------------
 
 // 여행 리스트
-router.post("/travel/list", TravelController.travel);
+router.post("/travel/list", TravelController.travelList);
+
+// 인기있는 여행 리스트
+router.post("/travel/popular/list", TravelController.popularTravleList);
 
 export default router;

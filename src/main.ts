@@ -26,7 +26,7 @@ import SchedulerService from "../src/routers/service/scheduler/SchedulerService"
     }
 
     // 고객 및 관리자
-    if (["Admin", "USER"].indexOf(Config.SERVER_TYPE) >= 0) {
+    if (["ADMIN", "USER"].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading')
         await DBLoader();
         await ClientLoader();
@@ -35,15 +35,14 @@ import SchedulerService from "../src/routers/service/scheduler/SchedulerService"
 
     // Tour Service
     if (["TOUR"].indexOf(Config.SERVER_TYPE) >= 0) {
-        Logger.info(Config.SERVER_TYPE + ' Is Loading')
-        await TOURLoader();
+        Logger.info(Config.SERVER_TYPE + ' Is Loading');
         await DBLoader();
+        await TOURLoader();
     }
 
     // 파일
     if (["DFS"].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading')
-        Logger.info('DataBase is Loading')
         await DBLoader();
         await DFSLoader();
     }
