@@ -63,6 +63,12 @@ class Config {
         FILE_CNT: string;
     }
 
+    ENCRYPT: {
+        ITERATIONS: number;
+        KEY_LENGTH: number;
+        DIGEST: string;
+        ENCRYPT_KEY: string;
+    }
 
     constructor() {
 
@@ -106,6 +112,13 @@ class Config {
             LEVEL: process.env.LEVEL,
             FILE_SIZE: process.env.FILE_SIZE,
             FILE_CNT: process.env.FILE_CNT
+        }
+
+        this.ENCRYPT = {
+            ITERATIONS: parseInt(process.env.ITERATIONS),
+            KEY_LENGTH: parseInt(process.env.KEY_LENGTH),
+            DIGEST: process.env.DIGEST,
+            ENCRYPT_KEY: process.env.ENCRYPT_KEY
         }
 
     }

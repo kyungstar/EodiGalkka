@@ -1,29 +1,31 @@
 
-import Config from "../../../../config"
-import DB from "../../../modules/Mysql";
-import QM from "../../../modules/QueryMaker";
-import MailService from "../mail/MailService";
-import Logger from "../../../modules/Logger";
-import {createToken, JwtModel} from "../../../middlewares/JwtAuth";
-import ResultBox from "../../dto/ResultBox";
-import DataChecker from "../../util/DataChecker";
-
 
 const escape = require('mysql').escape;
 const moment = require('moment');
-
-
 const crypto = require("crypto");
 
-export default class UserService extends ResultBox {
+
+import Config from "../../../../config"
+import DB from "../../../modules/Mysql";
+import QM from "../../../modules/QueryMaker";
+import Logger from "../../../modules/Logger";
+
+import {createToken, JwtModel} from "../../../middlewares/JwtAuth";
+import ResultBox from "../../dto/ResultBox";
+import DataChecker from "../../util/DataChecker";
+import SecurityAuth from "../../../middlewares/SecurityAuth";
 
 
-    public static async phoneCheck(phoneNumber: string) {
+export default class AdminService extends ResultBox {
+
+
+    public static async phoneCheck(phoneNumber: string, userType: string) {
 
         try {
 
             let result = await DB.getOne(QM.Select("t_node_user", {}, {
-                phone_number: phoneNumber
+                phone_number: phoneNumber,
+                user_type: userType
             }, ["*"]));
 
             if (result)
@@ -38,12 +40,13 @@ export default class UserService extends ResultBox {
     }
 
 
-    public static async emailCheck(email: string) {
+    public static async emailCheck(email: string, userType: string) {
 
         try {
 
             let result = await DB.getOne(QM.Select("t_node_user", {
-                email: email
+                email: email,
+                user_type: userType
             }, {}, ["*"]))
 
             if (result)
@@ -58,34 +61,25 @@ export default class UserService extends ResultBox {
     }
 
 
-    public static async Join(loginId: string, pwd: string, email: string, name: string, nickName: string, phoneNumber: string, gender: string, address: string, addressDetail: string) {
+    public static async Join(loginId: string, pwd: string, email: string, name: string
+                             , nickName: string, phoneNumber: string, gender: string, address: string, addressDetail: string
+                             , userType: string) {
 
         try {
 
             // 전화번호 중복 검증
-            if (DataChecker.onlyResultInterpreter(await this.phoneCheck(phoneNumber), false))
+            if (DataChecker.onlyResultInterpreter(await this.phoneCheck(phoneNumber, userType), false))
                 return this.JustErr('PA0');
 
             // 전화번호 중복 검증
-            if (DataChecker.onlyResultInterpreter(await this.emailCheck(email), false))
+            if (DataChecker.onlyResultInterpreter(await this.emailCheck(email, userType), false))
                 return this.JustErr('EA0');
-
-            // 문자열을 바이트 배열로 변환
-            const byteArr = Buffer.from(Config.DB.encrypt_key, 'utf-8');
-
-            // 바이트 배열을 16진수 문자열로 변환
-            const salt = byteArr.toString('hex');
-
-
-            const iterations = 100000; // 반복 횟수
-            const keyLength = 64; // 생성될 키의 길이
-            const digest = 'sha512'; // 해시 알고리즘
-
-            const derivedKey = crypto.pbkdf2Sync(pwd, salt, iterations, keyLength, digest);
-            const encryptedPassword = derivedKey.toString('hex');
 
 
             let userId = Math.random().toString(36).substring(7, 25);
+
+            // getEncryptPwd
+            const encryptedPassword = await SecurityAuth.getEncryptPwd(userId, pwd);
 
             const adminJoinResult = await DB.get([
                 QM.Insert("t_node_user", {
@@ -133,8 +127,6 @@ export default class UserService extends ResultBox {
                 },{},["*"])
             ]);
 
-
-
             const userLoginData = userInfoList[0][0];
             const userInfoData = userInfoList[1][0];
 
@@ -142,20 +134,11 @@ export default class UserService extends ResultBox {
                 return this.JustFalse('NU0');
 
             // 회원정보가 승인되지 않음.
-            if(userLoginData.status !== '100')
+            if(userInfoData.status !== 70)
                 return this.JustFalse('NAU');
 
-            const byteArr = Buffer.from(Config.DB.encrypt_key, 'utf-8');
-
-            // 바이트 배열을 16진수 문자열로 변환
-            const salt = byteArr.toString('hex');
-
-            const iterations = 100000; // 반복 횟수
-            const keyLength = 64; // 생성될 키의 길이
-            const digest = 'sha512'; // 해시 알고리즘
-
-            const derivedKey = crypto.pbkdf2Sync(pwd, salt, iterations, keyLength, digest);
-            const encryptedPassword = derivedKey.toString('hex');
+            // getEncryptPwd
+            const encryptedPassword = await SecurityAuth.getEncryptPwd(userInfoData.user_id, pwd);
 
             if(encryptedPassword !== userLoginData.pwd)
                 return this.JustFalse('NP0');
@@ -168,6 +151,7 @@ export default class UserService extends ResultBox {
             return this.JustErr(err);
         }
     }
+
 
 
 }

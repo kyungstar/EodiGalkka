@@ -152,16 +152,17 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['email'])
+                DataChecker.needArrCheck(res, req.body, ["email", "userType"])
             ) as {
-                email: string
+                email: string,
+                userType: string
             }
 
             if (typeof data == 'string') {
                 return this.clientReqError(req, res, data);
             }
 
-            let emailCheckResult = await UserService.emailCheck(data.email);
+            let emailCheckResult = await UserService.emailCheck(data.email, data.userType);
 
             this.resultInterpreter(req, res, emailCheckResult);
 
@@ -177,16 +178,17 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['phoneNumber'])
+                DataChecker.needArrCheck(res, req.body, ['phoneNumber', 'userType'])
             ) as {
-                phoneNumber: string
+                phoneNumber: string,
+                userType: string
             }
 
             if (typeof data == 'string') {
                 this.clientReqError(req, res, data);
             }
 
-            let phoneCheckResult = await UserService.phoneCheck(data.phoneNumber);
+            let phoneCheckResult = await UserService.phoneCheck(data.phoneNumber, data.userType);
 
             this.resultInterpreter(req, res, phoneCheckResult)
 

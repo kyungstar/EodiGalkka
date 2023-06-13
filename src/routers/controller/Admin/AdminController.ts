@@ -18,7 +18,7 @@ class AdminController extends ResController {
 
         let data = DataChecker.mergeObject(
             DataChecker.needArrCheck(res, req.body, [
-                "loginId", "pwd", "email", "phoneNumber", "gender", "name"
+                "loginId", "pwd", "email", "phoneNumber", "gender", "name", "userType"
             ]),
             DataChecker.stringArrCheck(res, req.body, [
                 "address", "addressDetail", "nickName"
@@ -43,7 +43,7 @@ class AdminController extends ResController {
         try {
 
             let userJoinResult = await AdminService.Join(data.loginId, data.pwd, data.email, data.name, data.nickName, data.phoneNumber, data.gender
-                , data.address, data.addressDetail);
+                , data.address, data.addressDetail, data.userType);
 
             await this.resultInterpreter(req, res, userJoinResult);
 
@@ -64,8 +64,7 @@ class AdminController extends ResController {
             ])
         ) as {
             loginId: string,
-            pwd: string,
-            userType: string
+            pwd: string
         };
 
         if (typeof data == 'string') {

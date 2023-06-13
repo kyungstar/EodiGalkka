@@ -73,12 +73,13 @@ export default class UserService extends ResultBox {
     }
 
 
-    public static async phoneCheck(phoneNumber: string) {
+    public static async phoneCheck(phoneNumber: string, userType: string) {
 
         try {
 
             let result = await DB.getOne(QM.Select("t_node_user", {}, {
-                phone_number: phoneNumber
+                phone_number: phoneNumber,
+                user_type: userType
             }, ["*"]));
 
             if (result)
@@ -93,12 +94,13 @@ export default class UserService extends ResultBox {
     }
 
 
-    public static async emailCheck(email: string) {
+    public static async emailCheck(email: string, userType: string) {
 
         try {
 
             let result = await DB.getOne(QM.Select("t_node_user", {
-                email: email
+                email: email,
+                user_type: userType
             }, {}, ["*"]))
 
             if (result)
@@ -120,12 +122,12 @@ export default class UserService extends ResultBox {
 
 
             // 전화번호 중복 검증
-            if (DataChecker.onlyResultInterpreter(await this.phoneCheck(phoneNumber), false))
+            if (DataChecker.onlyResultInterpreter(await this.phoneCheck(phoneNumber, userType), false))
                 return this.JustErr('PA0');
 
 
             // 이메일 중복 검증
-            if (DataChecker.onlyResultInterpreter(await this.emailCheck(email), false))
+            if (DataChecker.onlyResultInterpreter(await this.emailCheck(email, userType), false))
                 return this.JustErr('EA0');
 
 
