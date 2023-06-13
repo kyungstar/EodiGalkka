@@ -83,6 +83,33 @@ class AdminController extends ResController {
 
     }
 
+
+    public joinList = async (req: Request, res: Response) => {
+        Logger.info("Call API - " + req.originalUrl);
+
+
+        let data = DataChecker.mergeObject(
+            DataChecker.needArrCheck(res, req.body, ["userType"])
+        ) as {
+            userType: string
+        };
+
+        if (typeof data == 'string') {
+            return this.clientReqError(req, res, data);
+        }
+
+        try {
+
+            await AdminService.userJoinList(data.userType)
+
+            await this.resultInterpreter(req, res, '01');
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
+    }
+
 }
 
 

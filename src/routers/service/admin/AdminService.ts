@@ -152,6 +152,26 @@ export default class AdminService extends ResultBox {
         }
     }
 
+    public static async userJoinList(userType: string) {
+
+        try {
+
+
+/*
+
+            const userInfoList = await DB.getList(
+                QM.("t_node_login",{
+                    login_id: loginId
+                },{},["*"]),
+            );
+
+            return this.ObjTrue('LS0', [{token: token, user_info: userInfoData}]);
+
+*/
+        } catch (err) {
+            return this.JustErr(err);
+        }
+    }
 
 
 }

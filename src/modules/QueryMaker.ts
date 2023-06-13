@@ -41,6 +41,46 @@ class QueryMaker extends ResController{
 
     }
 
+    /*decrpytSelect = (tblName: string, decryptSelectList: any, selectObj: any, decryptSelectObj: any, selectList: string[]) => {
+
+        try {
+
+            let query =
+                " SELECT ";
+
+            for (let k in decryptSelectObj) {
+
+                query += ` CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g,"") + escape(Config.DB.encrypt_key) + ") USING utf8) = " + escape(decryptSelectObj[k]);
+
+            }
+
+            for (let item of selectList) {
+                query += item + ','
+            }
+
+            query = query.slice(0, -1);
+
+            query += " " +
+                "   FROM " + tblName +
+                "   WHERE 1 = 1 ";
+
+
+
+            for (let k in selectObj) {
+
+                if(selectObj[k][0] === '\\')
+                    query += " AND " + k + selectObj[k].slice(1, selectObj[k].length);
+                else
+                    query += " AND " + k + " = " + escape(selectObj[k]);
+            }
+
+            return query;
+
+        } catch (err) {
+            Logger.debug('Query Select Fail')
+        }
+
+    }*/
 
     Select = (tblName: string, selectObj: any, decryptSelectObj: any, selectList: string[]) => {
 
@@ -165,6 +205,44 @@ class QueryMaker extends ResController{
         }
 
     }
+
+    leftJoin = (input: any, tblName: string,  mappingList: any, inputSelectList: any, joinSelectList: any) => {
+
+        try {
+
+            let query = ` SELECT `
+
+            for(let inputSelectData of inputSelectList) {
+                query += "i." + inputSelectData + ", ";
+            }
+
+            for(let joinSelectData of joinSelectList) {
+                query += "j." + joinSelectData + ", ";
+            }
+
+            query = query.slice(0, -2);
+
+
+            query += `FROM (
+                        ${input}
+                      ) i `
+
+            query += "LEFT JOIN " + tblName + " j ON ";
+
+            for(let mappingData of mappingList){
+                query += " i." + mappingData + " = j." + mappingData + " AND";
+            }
+
+            query = query.slice(0, -3);
+
+            return query;
+
+        } catch (err) {
+            Logger.debug(err)
+        }
+
+    }
+
 
 }
 
