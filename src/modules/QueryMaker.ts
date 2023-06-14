@@ -8,7 +8,7 @@ import Config from "../../config";
 
 const escape = require('sqlstring').escape;
 
-class QueryMaker extends ResController{
+class QueryMaker extends ResController {
 
     Insert = (tblName: string, insertObj: any) => {
 
@@ -41,38 +41,41 @@ class QueryMaker extends ResController{
 
     }
 
-    /*decrpytSelect = (tblName: string, decryptSelectList: any, selectObj: any, decryptSelectObj: any, selectList: string[]) => {
+    decrpytSelect = (tblName: string, decryptSelectList: string[], selectList: string[], selectObj: any) => {
+
 
         try {
-
             let query =
                 " SELECT ";
 
-            for (let k in decryptSelectObj) {
-
-                query += ` CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g,"") + escape(Config.DB.encrypt_key) + ") USING utf8) = " + escape(decryptSelectObj[k]);
-
-            }
-
             for (let item of selectList) {
-                query += item + ','
+                query += item + ', '
             }
+
+            if(decryptSelectList.length === 0)
+                query = query.slice(0, -2);
+
+
+            for (let k of decryptSelectList) {
+                query += ` CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g, "") + escape(Config.DB.encrypt_key) + ") USING utf8) as " + escape(k) + ',';
+            }
+
 
             query = query.slice(0, -1);
+
 
             query += " " +
                 "   FROM " + tblName +
                 "   WHERE 1 = 1 ";
 
-
-
             for (let k in selectObj) {
 
-                if(selectObj[k][0] === '\\')
+                if (selectObj[k][0] === '\\')
                     query += " AND " + k + selectObj[k].slice(1, selectObj[k].length);
                 else
                     query += " AND " + k + " = " + escape(selectObj[k]);
             }
+
 
             return query;
 
@@ -80,13 +83,12 @@ class QueryMaker extends ResController{
             Logger.debug('Query Select Fail')
         }
 
-    }*/
+    }
 
     Select = (tblName: string, selectObj: any, decryptSelectObj: any, selectList: string[]) => {
 
         try {
 
-            let decryptQuery = "";
             let query =
                 " SELECT ";
 
@@ -102,13 +104,13 @@ class QueryMaker extends ResController{
 
             for (let k in decryptSelectObj) {
 
-                query += ` AND CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g,"") + escape(Config.DB.encrypt_key) + ") USING utf8) = " + escape(decryptSelectObj[k]);
+                query += ` AND CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g, "") + escape(Config.DB.encrypt_key) + ") USING utf8) = " + escape(decryptSelectObj[k]);
 
             }
 
             for (let k in selectObj) {
 
-                if(selectObj[k][0] === '\\')
+                if (selectObj[k][0] === '\\')
                     query += " AND " + k + selectObj[k].slice(1, selectObj[k].length);
                 else
                     query += " AND " + k + " = " + escape(selectObj[k]);
@@ -155,7 +157,6 @@ class QueryMaker extends ResController{
         }
 
     }
-
 
 
     Update = (tblName: string, updateObj: any, targetObj: any) => {
@@ -206,17 +207,17 @@ class QueryMaker extends ResController{
 
     }
 
-    leftJoin = (input: any, tblName: string,  mappingList: any, inputSelectList: any, joinSelectList: any) => {
+    leftJoin = (input: any, tblName: string, mappingList: any, inputSelectList: any, joinSelectList: any) => {
 
         try {
 
             let query = ` SELECT `
 
-            for(let inputSelectData of inputSelectList) {
+            for (let inputSelectData of inputSelectList) {
                 query += "i." + inputSelectData + ", ";
             }
 
-            for(let joinSelectData of joinSelectList) {
+            for (let joinSelectData of joinSelectList) {
                 query += "j." + joinSelectData + ", ";
             }
 
@@ -229,7 +230,7 @@ class QueryMaker extends ResController{
 
             query += "LEFT JOIN " + tblName + " j ON ";
 
-            for(let mappingData of mappingList){
+            for (let mappingData of mappingList) {
                 query += " i." + mappingData + " = j." + mappingData + " AND";
             }
 

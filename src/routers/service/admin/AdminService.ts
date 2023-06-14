@@ -1,5 +1,3 @@
-
-
 const escape = require('mysql').escape;
 const moment = require('moment');
 const crypto = require("crypto");
@@ -62,8 +60,8 @@ export default class AdminService extends ResultBox {
 
 
     public static async Join(loginId: string, pwd: string, email: string, name: string
-                             , nickName: string, phoneNumber: string, gender: string, address: string, addressDetail: string
-                             , userType: string) {
+        , nickName: string, phoneNumber: string, gender: string, address: string, addressDetail: string
+        , userType: string) {
 
         try {
 
@@ -119,28 +117,28 @@ export default class AdminService extends ResultBox {
         try {
 
             const userInfoList = await DB.get([
-                QM.Select("t_node_login",{
+                QM.Select("t_node_login", {
                     login_id: loginId
-                },{},["*"]),
-                QM.Select("t_node_user",{
+                }, {}, ["*"]),
+                QM.Select("t_node_user", {
                     login_id: loginId
-                },{},["*"])
+                }, {}, ["*"])
             ]);
 
             const userLoginData = userInfoList[0][0];
             const userInfoData = userInfoList[1][0];
 
-            if(!userLoginData || !userInfoData)
+            if (!userLoginData || !userInfoData)
                 return this.JustFalse('NU0');
 
             // 회원정보가 승인되지 않음.
-            if(userInfoData.status !== 70)
+            if (userInfoData.status !== 70)
                 return this.JustFalse('NAU');
 
             // getEncryptPwd
             const encryptedPassword = await SecurityAuth.getEncryptPwd(userInfoData.user_id, pwd);
 
-            if(encryptedPassword !== userLoginData.pwd)
+            if (encryptedPassword !== userLoginData.pwd)
                 return this.JustFalse('NP0');
 
             const token = createToken(new JwtModel(({u: userInfoData.user_id, t: userInfoData.user_type} as JwtModel)));
@@ -152,22 +150,44 @@ export default class AdminService extends ResultBox {
         }
     }
 
-    public static async userJoinList(userType: string) {
+    public static async agencyJoinList(userType: string) {
 
         try {
 
 
-/*
+            const userInfoList = await DB.getList(QM.decrpytSelect("t_node_user", ["phone_number", "user_name"]
+                , ["user_id", "email", "nickname", "gender", "address"
+                    , "address_detail", "join_reason", "agency_name", "login_id"]
+                , {
+                    user_type: userType,
+                    status: 50
+                }
+            ));
 
-            const userInfoList = await DB.getList(
-                QM.("t_node_login",{
-                    login_id: loginId
-                },{},["*"]),
-            );
+            if (userInfoList)
+                return this.ObjTrue('LS0', [{userInfoList: userInfoList}]);
+            else
+                return this.JustFalse('NU1')
 
-            return this.ObjTrue('LS0', [{token: token, user_info: userInfoData}]);
 
-*/
+        } catch (err) {
+            return this.JustErr(err);
+        }
+    }
+
+
+    public static async joinAccept(status: string, userId: string) {
+
+        try {
+
+            const joinAccept = DB.Executer(QM.Update("t_node_user",{status: status}, {user_id: userId}));
+
+            if(joinAccept)
+                return this.JustTrue('US1')
+            else
+                return this.JustFalse('UF1')
+
+
         } catch (err) {
             return this.JustErr(err);
         }
