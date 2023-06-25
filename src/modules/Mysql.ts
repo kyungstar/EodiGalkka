@@ -84,15 +84,10 @@ class MariaDB {
             let query = statement.join(" ; ");
             let result = await conn.query(query);
 
+
             if (result.length !== statement.length) {
                 throw new Error("Miss match query count! - Injection attack warning");
             }
-
-            let affectedRows = 0;
-
-            for(let resultData of result)
-                affectedRows += resultData.affectedRows
-
 
             Logger.debug("Query result - " + (!!result));
             Logger.debug(query);
@@ -100,10 +95,7 @@ class MariaDB {
             await conn.commit();
             await conn.release();
 
-            if(statement.length !== affectedRows)
-                return false
-            else
-                return result;
+            return result;
 
         } catch (err) {
             await conn.rollback();
@@ -125,7 +117,7 @@ class MariaDB {
             Logger.debug("Query result - " + (!!result));
             Logger.debug(statement);
 
-            if(result.affectedRows === 0)
+            if (result.affectedRows === 0)
                 return false;
             else
                 return true;
