@@ -15,9 +15,6 @@ import apiAgency from './Agency/index'
 const router = Router();
 
 
-if (Config.SERVER_TYPE === "USER") {
-    router.use("/api", apiUSER);
-}
 
 if (Config.SERVER_TYPE === "ADMIN") {
     router.use("/api/admin", apiAdmin);
@@ -26,6 +23,7 @@ if (Config.SERVER_TYPE === "ADMIN") {
 
 if (Config.SERVER_TYPE === "TOUR") {
     router.use("/api/tour", apiTOUR);
+    router.use("/api", apiUSER);
 }
 
 export default router;

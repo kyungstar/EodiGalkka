@@ -8,10 +8,10 @@ const router = Router();
 
 
 // 이메일 중복검사 ✓
-router.post("/user/email/check", UserController.userEmail)
+router.post("/user/email/check", [jwtAuthCheck], UserController.userEmail)
 
 // 전화번호 중복검사 ✓
-router.post("/user/phone/check", UserController.userPhone)
+router.post("/user/phone/check", [jwtAuthCheck], UserController.userPhone)
 
 // 회원가입 ✓
 router.post("/user/join", UserController.userJoin)
@@ -20,13 +20,13 @@ router.post("/user/join", UserController.userJoin)
 router.post("/user/login", UserController.userLogin)
 
 // 인증발송 API ✓
-router.post("/send/auth", UserController.sendAuth)
+router.post("/send/auth", [jwtAuthCheck], UserController.sendAuth)
 
 // 인증하기 ✓
-router.post("/user/auth", UserController.userAuth)
+router.post("/user/auth", [jwtAuthCheck], UserController.userAuth)
 
 // 비밀번호 인증 ✓
-router.post("/user/password/auth", UserController.authPw)
+router.post("/user/password/auth", [jwtAuthCheck], UserController.authPw)
 
 // 비밀번호 변경하기 ✓
 router.post("/user/password", [jwtAuthCheck], UserController.resetPw)

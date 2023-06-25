@@ -7,6 +7,7 @@ import Logger from "../../../modules/Logger";
 import {createToken, JwtModel} from "../../../middlewares/JwtAuth";
 import ResultBox from "../../dto/ResultBox";
 import DataChecker from "../../util/DataChecker";
+import SecurityAuth from "../../../middlewares/SecurityAuth";
 
 
 const escape = require('mysql').escape;
@@ -77,9 +78,10 @@ export default class UserService extends ResultBox {
 
         try {
 
-            let result = await DB.getOne(QM.Select("t_node_user", {}, {
-                phone_number: phoneNumber,
+            let result = await DB.getOne(QM.Select("t_node_user", {
                 user_type: userType
+            }, {
+                phone_number: phoneNumber
             }, ["*"]));
 
             if (result)
@@ -132,15 +134,13 @@ export default class UserService extends ResultBox {
 
 
             let userId = Math.random().toString(36).substring(7, 25);
-            let newPwd: string = "";
 
-            for (let i = 0; i < 6; i++) {
-                const rnum = Math.floor(Math.random() * pwd.length);
-                newPwd += pwd.substring(rnum, rnum + 1)
-            }
+            // getEncryptPwd
+            const encryptedPassword = await SecurityAuth.getEncryptPwd(userId, pwd);
 
 
-            await DB.get([
+            const userInsertResult = await DB.get([
+
                 QM.Insert("t_node_user", {
                     user_id: userId,
                     login_id: loginId,
@@ -157,22 +157,19 @@ export default class UserService extends ResultBox {
                 QM.Insert("t_node_login", {
                     user_id: userId,
                     login_id: loginId,
-                    pwd: crypto.createHash('sha512').update(pwd).digest('hex'),
+                    pwd: encryptedPassword,
                     auth_type: 'USER_JOIN',
-                    auth_pwd: newPwd,
+                    // auth_pwd: ,
                     auth_expire_date: '\\NOW() + INTERVAL 3 MINUTE',
                     reg_date: '\\NOW()'
                 })
             ])
 
-            const contents = '고객님의 메일 인증 비밀번호는 ' + newPwd + '입니다.'
-
-            let sendEmailResult = await MailService.send(email, '회원가입 인증코드입니다.', contents);
-
-            if (sendEmailResult.accepted.includes(email))
+            if (userInsertResult)
                 return this.JustTrue('01');
             else
                 return this.JustFalse('01');
+
 
         } catch (err) {
             return this.JustErr(err);
@@ -204,7 +201,6 @@ export default class UserService extends ResultBox {
             }
 
 
-            // todo 트랜잭션 처리 필요함.
             // 비밀번호 불일치
             if (pwd !== loginData.pwd) {
 

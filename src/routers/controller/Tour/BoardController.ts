@@ -12,6 +12,62 @@ import BoardService from "../../service/tour/board/BoardService";
 
 class BoardController extends ResController {
 
+
+    public boardDetail = async (req: Request, res: Response) => {
+        Logger.info("Call API - " + req.originalUrl);
+
+        let data = DataChecker.mergeObject(
+            DataChecker.needArrCheck(res, req.body, ["boardSeq"]),
+            DataChecker.loadJWTValue(req.body)
+        ) as {
+            boardSeq: number
+        };
+
+        if (typeof data == 'string') {
+            return this.clientReqError(req, res, data);
+        }
+
+        try {
+
+            //const boardListResult = await BoardService.boardList(data.boardType, data.page);
+
+            //await this.resultInterpreter(req, res, boardListResult);
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
+    }
+
+
+    public boardList = async (req: Request, res: Response) => {
+        Logger.info("Call API - " + req.originalUrl);
+
+        let data = DataChecker.mergeObject(
+            DataChecker.needArrCheck(res, req.body, ["boardType"]),
+            DataChecker.numberArrCheck(res, req.body, ["page"], 1, false)
+        ) as {
+            boardType: string,
+            page: number
+        };
+
+        if (typeof data == 'string') {
+            return this.clientReqError(req, res, data);
+        }
+
+        try {
+
+            const boardListResult = await BoardService.boardList(data.boardType, data.page);
+
+            await this.resultInterpreter(req, res, boardListResult);
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
+    }
+
+
     public boardWrite = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
@@ -22,7 +78,7 @@ class BoardController extends ResController {
         ) as {
             userId: string,
             fileList: string[],
-            boardType: BoardType.TOUR,
+            boardType: string,
             title: string,
             contents: string,
             targetSeq: number
@@ -55,7 +111,7 @@ class BoardController extends ResController {
             boardSeq: number,
             userId: string,
             fileList: string[],
-            boardType: BoardType.TOUR,
+            boardType: string,
             title: string,
             contents: string,
             targetSeq: number
@@ -82,16 +138,12 @@ class BoardController extends ResController {
 
         let data = DataChecker.mergeObject(
             DataChecker.stringArrCheck(res, req.body, ["boardSeq"], true),
-            DataChecker.stringArrCheck(res, req.body, [], false),
-            DataChecker.numberArrCheck(res, req.body, [], 0,true)
+            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
+            DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number,
             userId: string,
-            fileList: string[],
-            boardType: BoardType.TOUR,
-            title: string,
-            contents: string,
-            targetSeq: number
+            fileList: string[]
         };
 
         if (typeof data == 'string') {
@@ -100,7 +152,7 @@ class BoardController extends ResController {
 
         try {
 
-            const boardUpdateResult = await BoardService.boardUpdate(data.boardSeq, data.userId, data.boardType, data.targetSeq, data.title, data.contents, data.fileList);
+            const boardUpdateResult = await BoardService.boardDelete(data.boardSeq, data.userId, data.fileList);
 
             await this.resultInterpreter(req, res, boardUpdateResult);
 

@@ -88,8 +88,11 @@ class MariaDB {
                 throw new Error("Miss match query count! - Injection attack warning");
             }
 
-            if(statement.length !== result.affectedRows)
-                throw new Error('Miss Match Affected Rows');
+            let affectedRows = 0;
+
+            for(let resultData of result)
+                affectedRows += resultData.affectedRows
+
 
             Logger.debug("Query result - " + (!!result));
             Logger.debug(query);
@@ -97,7 +100,10 @@ class MariaDB {
             await conn.commit();
             await conn.release();
 
-            return result;
+            if(statement.length !== affectedRows)
+                return false
+            else
+                return result;
 
         } catch (err) {
             await conn.rollback();

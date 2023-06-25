@@ -244,6 +244,20 @@ class QueryMaker extends ResController {
 
     }
 
+    getPage= (targetObj: any, targetPage: any) => {
+
+        try {
+
+            let query = `ORDER BY ${escape(targetObj)} ASC LIMIT ${escape(30 * (targetPage - 1), 30 * targetPage)}`
+
+            return query;
+
+        } catch (err) {
+            Logger.debug(err)
+        }
+
+    }
+
 
 }
 

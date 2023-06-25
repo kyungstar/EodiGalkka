@@ -25,13 +25,6 @@ import SchedulerService from "../src/routers/service/scheduler/SchedulerService"
         schedule.scheduleJob('0 0 * * *', SchedulerService.updateTodayCount);
     }
 
-    // 고객 및 관리자
-    if (["ADMIN", "USER"].indexOf(Config.SERVER_TYPE) >= 0) {
-        Logger.info(Config.SERVER_TYPE + ' Is Loading')
-        await DBLoader();
-        await ClientLoader();
-    }
-
 
     // Tour Service
     if (["TOUR"].indexOf(Config.SERVER_TYPE) >= 0) {

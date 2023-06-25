@@ -110,10 +110,10 @@ class UserController extends ResController {
             let userJoinResult = await UserService.Join(data.loginId, data.pwd, data.userType, data.email, data.name, data.nickName, data.phoneNumber, data.gender
                 , data.address, data.addressDetail);
 
-            this.resultInterpreter(req, res, userJoinResult);
+            await this.resultInterpreter(req, res, userJoinResult);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -138,10 +138,10 @@ class UserController extends ResController {
 
             let accessInfo = await UserService.Access(res, data.loginId, data.pwd);
 
-            this.resultInterpreter(req, res, accessInfo);
+            await this.resultInterpreter(req, res, accessInfo);
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
 

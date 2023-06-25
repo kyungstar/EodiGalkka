@@ -4,6 +4,50 @@ import ResultBox from "../../../dto/ResultBox";
 
 export default class BoardService extends ResultBox {
 
+
+
+    public static async boardDetail(boardSeq: number) {
+
+        try {
+
+
+            const boardDetailList = await DB.get([
+
+                QM.Select("t_board",{board_seq: boardSeq},{},["*"]),
+                QM.Select("t_board_reply",{board_seq: boardSeq},{},["*"]),
+            ]);
+
+            // todo 수정작업 필요함
+
+     /*       if (boardDetailList)
+                return this.ObjTrue('WS0', boardList);
+            else
+                return this.JustFalse('WF0');
+*/
+        } catch (err) {
+            return err;
+        }
+    }
+
+    public static async boardList(boardType: string, page: number) {
+
+        try {
+
+            const boardList = await DB.getList(
+                QM.Select("t_board", {
+                board_type: boardType},{},["board_seq", "user_id", "board_type", "target_seq", "title"])
+                + QM.getPage("board_seq", page))
+
+            if (boardList)
+                return this.ObjTrue('WS0', boardList);
+            else
+                return this.JustFalse('WF0');
+
+        } catch (err) {
+            return err;
+        }
+    }
+
     public static async boardWrite(userId: string, boardType: string, targetSeq: number, title: string, contents: string, fileList: string[]) {
 
         try {
@@ -52,9 +96,14 @@ export default class BoardService extends ResultBox {
         }
     }
 
-    public static async boardDelete(boardSeq: number, userId: string, boardType: string, targetSeq: number, title: string, contents: string, fileSeqList: string[]) {
+    public static async boardDelete(boardSeq: number, userId: string, fileSeqList: string[]) {
 
         try {
+
+            const boardData = await DB.getOne(QM.Select("t_board",{board_seq: boardSeq, user_id: userId},{},["*"]));
+
+            if(!boardData)
+                throw 'Is Not Your Board Data';
 
             const queryList = [];
 
@@ -63,7 +112,7 @@ export default class BoardService extends ResultBox {
             if(fileSeqList.length > 0)
                 queryList.push(QM.Delete("t_file", {file_seq: 'IN ( ' + fileSeqList + ')'}))
 
-            const boardDeleteResult = DB.get(queryList);
+            const boardDeleteResult = await DB.get(queryList);
 
             if (boardDeleteResult)
                 return this.JustTrue('WS0');
