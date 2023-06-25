@@ -125,7 +125,10 @@ class MariaDB {
             Logger.debug("Query result - " + (!!result));
             Logger.debug(statement);
 
-            return result.affectedRows;
+            if(result.affectedRows === 0)
+                return false;
+            else
+                return true;
 
         } catch (err) {
             await conn.rollback();
