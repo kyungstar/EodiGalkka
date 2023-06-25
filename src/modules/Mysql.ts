@@ -88,6 +88,9 @@ class MariaDB {
                 throw new Error("Miss match query count! - Injection attack warning");
             }
 
+            if(statement.length !== result.affectedRows)
+                throw new Error('Miss Match Affected Rows');
+
             Logger.debug("Query result - " + (!!result));
             Logger.debug(query);
 

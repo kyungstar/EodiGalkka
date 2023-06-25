@@ -4,8 +4,8 @@ const router = express.Router();
 
 import Config from "../../../../config";
 
-import TourController from ".//TourController";
-import BoardController from ".//BoardController";
+import TourController from "./TourController";
+import BoardController from "./BoardController";
 import TravelController from "./TravelController";
 
 
@@ -39,5 +39,29 @@ router.post("/travel/list", TravelController.travelList);
 
 // 인기있는 여행 리스트
 router.post("/travel/popular/list", TravelController.popularTravleList);
+
+// 투어 여행글 작성하기 -----------------------------------------------------
+
+// 투어 여행글 작성하기
+router.post("/board", BoardController.boardWrite);
+
+// 투어 여행글 수정하기
+router.post("/board/update", BoardController.boardUpdate);
+
+// 투어 여행글 삭제하기
+router.post("/board/update", BoardController.boardUpdate);
+
+//todo 목록
+// 투어 여행글 목록 조회하기
+// router.post("/board/update", BoardController.boardUpdate);
+
+// 투어 여행글 상세 조회하기 (조회시 조회수 증가)
+// router.post("/board/update", BoardController.boardUpdate);
+
+// 투어 여행글 좋아요 누르기 (싫어요는 없다.)
+// router.post("/board/update", BoardController.boardUpdate);
+
+// 투어 여행글 신고하기
+// router.post("/board/update", BoardController.boardUpdate);
 
 export default router;

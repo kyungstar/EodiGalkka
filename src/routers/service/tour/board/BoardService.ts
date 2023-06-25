@@ -4,11 +4,14 @@ import ResultBox from "../../../dto/ResultBox";
 
 export default class BoardService extends ResultBox {
 
-    public static async boardWrite(countrySeq: number, title: string, contents: string, fileList: string[]) {
+    public static async boardWrite(userId: string, boardType: string, targetSeq: number, title: string, contents: string, fileList: string[]) {
 
         try {
 
-            const boardWriteResult = await DB.Executer(QM.Insert("t_board",{
+            const boardWriteResult = await DB.Executer(QM.Insert("t_board", {
+                user_id: userId,
+                board_type: boardType,
+                target_seq: targetSeq,
                 title: title,
                 contents: contents,
                 fileList: fileList
@@ -19,6 +22,53 @@ export default class BoardService extends ResultBox {
             else
                 return this.JustFalse('WF0');
 
+        } catch (err) {
+            return err;
+        }
+    }
+
+    public static async boardUpdate(boardSeq: number, userId: string, boardType: string, targetSeq: number, title: string, contents: string, fileList: string[]) {
+
+        try {
+
+            const boardUpdateResult = await DB.Executer(QM.Update("t_board", {
+                user_id: userId,
+                board_type: boardType,
+                target_seq: targetSeq,
+                title: title,
+                contents: contents,
+                fileList: fileList
+            }, {
+                board_seq: boardSeq
+            }))
+
+            if (boardUpdateResult)
+                return this.JustTrue('WS0');
+            else
+                return this.JustFalse('WF0');
+
+        } catch (err) {
+            return err;
+        }
+    }
+
+    public static async boardDelete(boardSeq: number, userId: string, boardType: string, targetSeq: number, title: string, contents: string, fileSeqList: string[]) {
+
+        try {
+
+            const queryList = [];
+
+            queryList.push(QM.Delete("t_board", {board_seq: boardSeq}));
+
+            if(fileSeqList.length > 0)
+                queryList.push(QM.Delete("t_file", {file_seq: 'IN ( ' + fileSeqList + ')'}))
+
+            const boardDeleteResult = DB.get(queryList);
+
+            if (boardDeleteResult)
+                return this.JustTrue('WS0');
+            else
+                return this.JustFalse('WF0');
 
         } catch (err) {
             return err;
