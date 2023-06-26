@@ -48,7 +48,28 @@ class MariaDB {
             return null;
 
         }
+    }
 
+    async getCount(statement: string) {
+        let conn = await this.getConnection();
+
+        try {
+            let result = await conn.query(statement.trim());
+
+            Logger.debug("Query result - " + (!!result));
+            Logger.debug(statement);
+
+            await conn.commit();
+            await conn.release();
+
+            return result[0].count;
+
+        } catch (err) {
+            Logger.debug('Query Select Fail', err);
+            await conn.release();
+            return null;
+
+        }
     }
 
     async getList(statement: string) {
@@ -100,7 +121,10 @@ class MariaDB {
         } catch (err) {
             await conn.rollback();
             await conn.release();
+
             Logger.debug('Query Execute Fail', err);
+            return false;
+
         }
     }
 
@@ -154,8 +178,8 @@ class MariaDB {
             return null;
 
         }
-
     }
+
 
 
 }

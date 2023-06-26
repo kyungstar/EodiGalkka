@@ -52,7 +52,7 @@ class QueryMaker extends ResController {
                 query += item + ', '
             }
 
-            if(decryptSelectList.length === 0)
+            if (decryptSelectList.length === 0)
                 query = query.slice(0, -2);
 
 
@@ -244,13 +244,50 @@ class QueryMaker extends ResController {
 
     }
 
-    getPage= (targetObj: any, targetPage: any) => {
+    joinTxt = (input: any, tblName: string, joinType: string, mappingTxt: string, selectList: string, decryptSelectList: string) => {
 
         try {
 
-            let query = `ORDER BY ${escape(targetObj)} ASC LIMIT ${escape(30 * (targetPage - 1), 30 * targetPage)}`
+            let query = `SELECT ` + selectList;
+
+            for (let k of decryptSelectList) {
+                query += `, CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g, "") + escape(Config.DB.encrypt_key) + ") USING utf8) as " + escape(k) + '';
+            }
+
+            query += ` FROM (${input})  i `
+
+            query += joinType + ' JOIN ' + tblName + ' j ON '  + mappingTxt;
+
+            console.log(query);
 
             return query;
+
+        } catch (err) {
+            Logger.debug(err)
+        }
+
+    }
+
+    getPage = (orderTargetList: any, targetPage: number) => {
+
+        try {
+
+            let footQuery = ` ORDER BY `
+
+            for (const orderTargetData of orderTargetList) {
+                footQuery += ` ${escape(orderTargetData)} DESC, `
+            }
+
+
+            footQuery = footQuery.slice(0, -2);
+
+            if (orderTargetList.length !== 0)
+                footQuery += ` LIMIT ${escape(30 * (targetPage - 1))}, ${escape(30 * (targetPage))}`;
+            else
+                footQuery = ` LIMIT ${escape(30 * (targetPage - 1))}, ${escape(30 * (targetPage))}`;
+
+
+            return footQuery;
 
         } catch (err) {
             Logger.debug(err)
