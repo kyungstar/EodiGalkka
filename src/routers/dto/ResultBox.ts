@@ -36,37 +36,21 @@ export default class ResultBox {
 
         let resultObj;
 
-        if(targetObj.length === 1)
-            resultObj = Object.assign({}, targetObj[0], dto);
-        else
-            resultObj = Object.assign({}, targetObj, dto);
+        resultObj = Object.assign({}, targetObj[0], dto);
+
 
         return resultObj;
 
     }
-/*    static JustTrue(res, code: string) {
-        if (!dto) { // @ts-ignore
-            dto = {};
-        }
-
-        // @ts-ignore
-        dto.result = true;
-        // @ts-ignore
-        dto.code = code;
-
-        res.type('application/json');
-
-        return res.status(200).json(dto);
-    }*/
 
     static JustErr(err: string) {
 
-        err = err.substring(0, 10);
+        if (typeof err === "string")
+            err = err.substring(0, 10);
 
         Logger.debug(err + ' is Occured');
         return {result: false, code: '03', err: err + ' is Occurred'};
     }
-
 
 
 }
