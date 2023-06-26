@@ -122,12 +122,12 @@ export default class AgencyService extends ResultBox {
         try {
 
             const userInfoList = await DB.get([
-                QM.Select("t_node_login",{
+                QM.Select("t_node_login", {
                     login_id: loginId
-                },{},["*"]),
-                QM.Select("t_node_user",{
+                }, {}, ["*"]),
+                QM.Select("t_node_user", {
                     login_id: loginId
-                },{},["*"])
+                }, {}, ["*"])
             ]);
 
             const userLoginData = userInfoList[0][0];
