@@ -368,5 +368,21 @@ export default class UserService extends ResultBox {
         }
     }
 
+
+    public static getUserData(input: any, selectList: string, decryptSelect: string) {
+
+        try {
+
+            let getUserQuery = QM.joinTxt(input,
+                "t_node_user", "INNER", "i.user_id = j.user_id", selectList, decryptSelect
+            )
+
+            return getUserQuery;
+
+        } catch (err) {
+            return err;
+        }
+    }
+
 }
 
