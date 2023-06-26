@@ -1,10 +1,11 @@
 /**
- * Created by 유희찬 on 2023-05-26.
+ * Created by 강영규 on 2023-05-26.
  */
 
 import mariadb from "mariadb";
 import Logger from '../modules/Logger'
 
+// todo 완전 개선 필요
 class MariaDB {
 
     private cluster: any;
