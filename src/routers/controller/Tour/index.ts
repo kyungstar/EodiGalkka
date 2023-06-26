@@ -38,7 +38,7 @@ router.post("/travel/list", [jwtAuthCheck], TravelController.travelList);
 router.post("/travel/popular/list", [jwtAuthCheck], TravelController.popularTravleList);
 
 
-// todo 검증이 필요하다.
+
 
 // 투어 여행글 작성하기 -----------------------------------------------------
 
@@ -55,17 +55,17 @@ router.post("/board/list", [jwtAuthCheck], BoardController.boardList);
 router.post("/board/detail", [jwtAuthCheck], BoardController.boardDetail);
 
 
-// todo 목록
+
 // 투어 여행글 좋아요 누르기 (싫어요는 없다.)
 router.post("/board/like", [jwtAuthCheck], BoardController.boardLike);
 // 투어 여행글 댓글 남기기 (조회시 조회수 증가)
 router.post("/board/reply", [jwtAuthCheck], BoardController.boardReply);
 
+// todo 목록
 // 투어 여행글 신고하기
-// router.post("/board/report", BoardController.boardReport);
+router.post("/board/report", [jwtAuthCheck], BoardController.boardReport);
 
-// user_id와 join하여, 닉네임, 이름을 가져오는 UserService만들기.
 
-// 댓글, 좋아요 완성 신고하기 기능 작업 필요함.
+// 신고하기 기능 작업 필요함.
 
 export default router;

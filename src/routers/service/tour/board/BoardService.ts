@@ -139,7 +139,11 @@ export default class BoardService extends ResultBox {
                 throw 'Already Board Like';
 
 
-            const boardLikeResult = await DB.Executer(QM.Insert("t_board_like",{board_seq: boardSeq, user_id: userId}));
+            const boardLikeResult = await DB.get([
+
+                QM.Insert("t_board_like",{board_seq: boardSeq, user_id: userId}),
+                QM.Update("t_board",{like_cnt: '\\IFNULL(like_cnt, 0) + 1'}, {board_seq: boardSeq}),
+            ]);
 
             if (boardLikeResult)
                 return this.JustTrue('WS0');
@@ -174,6 +178,39 @@ export default class BoardService extends ResultBox {
         }
     }
 
+
+    public static async boardReport(boardSeq: number, boardType: string, userId: string, reportContents: string, fileList: string[]) {
+
+        try {
+
+            const boardData = await DB.getOne(QM.Select("t_board", {board_seq: boardSeq}, {}, ["*"]));
+
+            if (!boardData)
+                throw 'Not Exists Board';
+
+
+            const boardReportResult = await DB.get([
+
+                QM.Insert("t_board_report",{
+                    board_seq: boardSeq,
+                    board_type: boardType,
+                    report_contents: reportContents,
+                    user_id: userId,
+                    target_user_id: boardData.user_id,
+                    file_list: fileList
+                }),
+                QM.Update("t_board",{report_cnt: '\\IFNULL(report_cnt, 0) + 1'}, {board_seq: boardSeq})
+            ]);
+
+            if (boardReportResult)
+                return this.JustTrue('WS0');
+            else
+                return this.JustFalse('WF0');
+
+        } catch (err) {
+            return err;
+        }
+    }
 
 }
 

@@ -222,6 +222,38 @@ class BoardController extends ResController {
 
     }
 
+
+    public boardReport = async (req: Request, res: Response) => {
+        Logger.info("Call API - " + req.originalUrl);
+
+        let data = DataChecker.mergeObject(
+            DataChecker.needArrCheck(res, req.body, ["boardSeq", "boardType", "reportContents"]),
+            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
+            DataChecker.loadJWTValue(req.body)
+        ) as {
+            boardSeq: number,
+            boardType: string,
+            userId: string,
+            reportContents: string,
+            fileList: string[]
+        };
+
+        if (typeof data == 'string') {
+            return this.clientReqError(req, res, data);
+        }
+
+        try {
+
+            const boardReplyResult = await BoardService.boardReport(data.boardSeq, data.boardType, data.userId, data.reportContents, data.fileList);
+
+            await this.resultInterpreter(req, res, boardReplyResult);
+
+        } catch (err) {
+            await this.errInterpreter(req, res, err);
+        }
+
+    }
+
 }
 
 export default new BoardController();
