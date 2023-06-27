@@ -50,7 +50,6 @@ router.post("/board/update", [jwtAuthCheck], BoardController.boardUpdate);
 router.post("/board/delete", [jwtAuthCheck], BoardController.boardDelete);
 // 투어 여행글 목록 조회하기 ✓
 router.post("/board/list", [jwtAuthCheck], BoardController.boardList);
-
 // 투어 여행글 상세 조회하기 (조회시 조회수 증가) ✓
 router.post("/board/detail", [jwtAuthCheck], BoardController.boardDetail);
 

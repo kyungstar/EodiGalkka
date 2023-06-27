@@ -87,24 +87,6 @@ export default class ResController {
     }
 
 
-    public async dataCheck<T>(req: Request, res: express.Response, data: any, msg: string) {
-
-        let dto = {
-            result: false,
-            msg: data + msg
-        };
-
-        // Mongo Log
-        res.locals.data = dto;
-        await MongoLogging(req, res);
-
-
-        res.type('application/json');
-        return res.status(200).json(dto);
-
-    }
-
-
 
     public async true<T>(req: Request, res: express.Response, dto?: T) {
 

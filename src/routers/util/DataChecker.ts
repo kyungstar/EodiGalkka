@@ -2,8 +2,9 @@
  * Created By 강영규 On 2022-11-13
  */
 import ResController from "../controller/ResController";
-import express from "express";
 
+
+// 완전 개선 필요
 class DataChecker extends ResController {
 
 
@@ -14,23 +15,6 @@ class DataChecker extends ResController {
             userType: objData.userType
         }
     }
-/*
-
-    // 토큰 관리자 검증하기
-    public loadJWTAdminCheck(res: any, objData: any) {
-
-        if (objData.userType !== 'Admin')
-            return this.false(res, 'A01')
-    }
-
-
-    // 토큰 사용자 검증하기
-    public loadJWTUserCheck(res: any, objData: any) {
-        if (objData.userType !== 'USER' && objData.userType !== 'Admin')
-            return this.false(res, 'U01');
-    }
-*/
-
 
     // 필수 값 검증
     public needArrCheck(res: any, objData: any, needArr: string[]) {
@@ -108,6 +92,31 @@ class DataChecker extends ResController {
 
     }
 
+
+    public fileCheck(res: any, objData: any, fileArr: string[], isRequire: boolean) {
+
+        let retObj = {};
+        let dataFailList = [];
+
+        for (let item of fileArr) {
+
+            console.log(objData[item]);
+
+            if ((objData[item] == '' || objData[item] == undefined) && isRequire === true)
+                dataFailList.push(item)
+
+            // @ts-ignore
+            retObj[item] = objData[item];
+
+        }
+
+        if (dataFailList.length > 0)
+            return dataFailList + ' Is Essential Data';
+
+
+        return retObj;
+
+    }
 
     public mergeObject(...objList: any[]) {
         let obj = {};

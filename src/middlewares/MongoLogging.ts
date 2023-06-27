@@ -4,8 +4,11 @@ import Logger from "../modules/Logger";
 import Config from "../../config";
 
 
-
+// todo KYG :  몽고 커넥션 없을 떄도 처리하도록 해야한다.
+// todo docker : 몽고 자동 실행 확인하기.
+// todo 완전 개선 필요
 const logger = async (req: Request, res: Response) => {
+
     const {method, url, body, query, params} = req;
     const { statusCode, statusMessage } = res; // 추가: 응답 데이터를 가져옴
     const headers = res.getHeaders(); // 수정: res.getHeaders()를 사용하여 헤더 가져오기

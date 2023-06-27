@@ -14,6 +14,7 @@ import ResController from "../ResController";
 
 
 
+// todo DFS
 
 class FileController extends ResController {
 
@@ -23,7 +24,7 @@ class FileController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.stringArrCheck(res, req.body, ['file'], true)
+                DataChecker.fileCheck(res, req.body, ['file'], true)
             ) as {
                 file: string,
                 targetType: string
@@ -53,7 +54,6 @@ class FileController extends ResController {
 
             // 썸네일 업로드
             await sharp(dir + "/" + fileName).resize(200, 200).toFile(dir + "/" + fileThumbName);
-
 
             await this.resultInterpreter(req, res, fs);
 

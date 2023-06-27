@@ -8,6 +8,7 @@ import Config from "../../config";
 
 const escape = require('sqlstring').escape;
 
+// todo 완전 개선 필요
 class QueryMaker extends ResController {
 
     Insert = (tblName: string, insertObj: any) => {
@@ -130,9 +131,7 @@ class QueryMaker extends ResController {
 
             let query =
                 "   DELETE" +
-                "   FROM " + tblName;
-
-            query += " " +
+                "   FROM " + tblName +
                 "   WHERE ";
 
             for (let k in targetObj) {
@@ -207,42 +206,6 @@ class QueryMaker extends ResController {
 
     }
 
-    leftJoin = (input: any, tblName: string, mappingList: any, inputSelectList: any, joinSelectList: any) => {
-
-        try {
-
-            let query = ` SELECT `
-
-            for (let inputSelectData of inputSelectList) {
-                query += "i." + inputSelectData + ", ";
-            }
-
-            for (let joinSelectData of joinSelectList) {
-                query += "j." + joinSelectData + ", ";
-            }
-
-            query = query.slice(0, -2);
-
-
-            query += `FROM (
-                        ${input}
-                      ) i `
-
-            query += "LEFT JOIN " + tblName + " j ON ";
-
-            for (let mappingData of mappingList) {
-                query += " i." + mappingData + " = j." + mappingData + " AND";
-            }
-
-            query = query.slice(0, -3);
-
-            return query;
-
-        } catch (err) {
-            Logger.debug(err)
-        }
-
-    }
 
     joinTxt = (input: any, tblName: string, joinType: string, mappingTxt: string, selectList: string, decryptSelectList: string) => {
 
@@ -257,8 +220,6 @@ class QueryMaker extends ResController {
             query += ` FROM (${input})  i `
 
             query += joinType + ' JOIN ' + tblName + ' j ON '  + mappingTxt;
-
-            console.log(query);
 
             return query;
 

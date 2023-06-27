@@ -1,5 +1,5 @@
 /**
- * Created by 강영규 on 2023-05-26.
+ * Created by 강영정 on 2023-05-26.
  */
 
 import mariadb from "mariadb";
