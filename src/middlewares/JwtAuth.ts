@@ -2,14 +2,13 @@ import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 import Config from "../../config";
 
-
+// TODO 완전 개선이 필요하다.
 export class JwtModel {
 
     u: string;
     t: string;
 
-    constructor(obj: JwtModel);
-    constructor(obj: any){
+    constructor(obj: JwtModel){
         this.u = obj.u;
         this.t = obj.t;
     }
@@ -35,30 +34,27 @@ export function createToken(input: JwtModel) {
 
 export function jwtAuthCheck(req: Request, res: Response, next: NextFunction) {
 
-    let token = <string>req.headers["authorization"];
+    let token = req.headers.authorization
 
-    if (!token)
+    if (!token || token.indexOf("Bearer ", 0) < 0)
         return res.status(401).send({result: false, code: "401"});
-
-    if (token.indexOf("Bearer ", 0) < 0)
-        return res.status(401).send({result: false, code: "401 Bearer"});
 
     token = token.slice(7, token.length);
 
-    let jwtPayload;
+    let tokenData;
 
     try {
-        jwtPayload = new JwtModel(<JwtModel>jwt.verify(token, Config.JWT.SECRET));
-        res.locals.jwtPayload = jwtPayload;
+        tokenData = new JwtModel(<JwtModel>jwt.verify(token, Config.JWT.SECRET));
+        res.locals.jwtPayload = tokenData;
 
     } catch (err) {
         return res.status(401).send({result: false, code: "401", err: 'JWT Auth Error'});
 
     }
 
-    jwtPayload.deliverReqData(req);
-    let newToken = createToken(jwtPayload);
-    res.setHeader("token", newToken);
+    tokenData.deliverReqData(req);
+
+    res.setHeader("token", token);
 
     next();
 }
