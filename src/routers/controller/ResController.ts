@@ -2,8 +2,9 @@
 import express, {Request} from "express";
 import Logger from "../../../src/modules/Logger";
 import logger from "../../middlewares/MongoLogging";
-import MongoLogging from "../../middlewares/MongoLogging";
+// import MongoLogging from "../../middlewares/MongoLogging";
 
+// todo > Mongo 연구좀 해보기...
 
 export default class ResController {
 
@@ -11,7 +12,6 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = err;
-        await MongoLogging(req, res);
 
         try {
             Logger.error(err + ' Caused On Error');
@@ -20,6 +20,8 @@ export default class ResController {
         } catch (err) {
             await this.err(req, res, err);
         }
+
+       // await MongoLogging(req, res);
 
     }
 
@@ -42,6 +44,7 @@ export default class ResController {
             }
 
 
+
         } else {
             return false;
         }
@@ -50,20 +53,30 @@ export default class ResController {
 
     public async resultInterpreter(req: Request, res: express.Response, apiResponse: Object) {
 
-        // Mongo Log
-        res.locals.data = apiResponse;
-        await MongoLogging(req, res);
+        try {
 
-        if (typeof apiResponse === 'object') {
+            // Mongo Log
+            res.locals.data = apiResponse;
 
-            if ((apiResponse as { result: any }).result === false)
-                return this.false(req, res, apiResponse);
-            else
-                return this.true(req, res, apiResponse)
+            if (typeof apiResponse === 'object') {
 
-        } else {
-            return this.false(req, res, apiResponse);
+                if ((apiResponse as { result: any }).result === false)
+                    await this.false(req, res, apiResponse);
+                else
+                    await this.true(req, res, apiResponse)
+
+
+            } else {
+                await this.false(req, res, apiResponse);
+            }
+
+
+
+
+        } catch(err) {
+            await this.err(req, res, err);
         }
+
 
     }
 
@@ -79,7 +92,7 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        await MongoLogging(req, res);
+        // await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);
@@ -99,7 +112,7 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        await MongoLogging(req, res);
+        // await MongoLogging(req, res);
 
         res.type('application/json');
 
@@ -120,7 +133,7 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        await MongoLogging(req, res);
+        // await MongoLogging(req, res);
 
         return res.status(200).json(dto);
 
@@ -140,7 +153,7 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        await MongoLogging(req, res);
+        // await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);
