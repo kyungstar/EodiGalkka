@@ -16,9 +16,14 @@ import SchedulerService from "../src/routers/service/scheduler/SchedulerService"
 
 (async function () {
 
+    if(["SCHEDULER", "TOUR", "FMS", "MQTT"].indexOf(Config.SERVER_TYPE) >= 0) {
+        Logger.info('DB Is Loading')
+
+        await DBLoader();
+    }
+
     if(['SCHEDULER'].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading')
-        await DBLoader();
 
         // Scheduler Job Start
         schedule.scheduleJob('0 0 * * *', SchedulerService.updateTodayCount);
@@ -29,20 +34,20 @@ import SchedulerService from "../src/routers/service/scheduler/SchedulerService"
     if (["TOUR"].indexOf(Config.SERVER_TYPE) >= 0) {
         Logger.info(Config.SERVER_TYPE + ' Is Loading');
 
-        await DBLoader();
         await TOURLoader();
     }
 
     // 파일
     if (["FMS"].indexOf(Config.SERVER_TYPE) >= 0) {
-        Logger.info(Config.SERVER_TYPE + ' Is Loading')
-        await DBLoader();
+        Logger.info(Config.SERVER_TYPE + ' Is Loading');
+
         await DFSLoader();
     }
 
     // MQTT Messaging Protocol
     if (["MQTT"].indexOf(Config.SERVER_TYPE) >= 0) {
-        Logger.info(Config.SERVER_TYPE + ' Is Loading')
+        Logger.info(Config.SERVER_TYPE + ' Is Loading');
+
         await MQTTLoader();
     }
 
