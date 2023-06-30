@@ -1,8 +1,7 @@
-
 import express, {Request} from "express";
 import Logger from "../../../src/modules/Logger";
 import logger from "../../middlewares/MongoLogging";
-// import MongoLogging from "../../middlewares/MongoLogging";
+import MongoLogging from "../../middlewares/MongoLogging";
 
 // todo > Mongo 연구좀 해보기...
 
@@ -21,7 +20,7 @@ export default class ResController {
             await this.err(req, res, err);
         }
 
-       // await MongoLogging(req, res);
+        await MongoLogging(req, res);
 
     }
 
@@ -31,19 +30,17 @@ export default class ResController {
 
             // 타입을 판단한다.
             // 해당 Class의 참, 거짓 유무를 판단하기 위해 사용한다.
-            if(type === false) {
-                if((apiResponse as { result: any }).result === false && type === false)
+            if (type === false) {
+                if ((apiResponse as { result: any }).result === false && type === false)
                     return true;
                 else
                     return false;
             } else {
-                if((apiResponse as { result: any }).result === true && type === true)
+                if ((apiResponse as { result: any }).result === true && type === true)
                     return true;
                 else
                     return false;
             }
-
-
 
         } else {
             return false;
@@ -53,10 +50,10 @@ export default class ResController {
 
     public async resultInterpreter(req: Request, res: express.Response, apiResponse: Object) {
 
-        try {
+        // Mongo Log
+        res.locals.data = apiResponse;
 
-            // Mongo Log
-            res.locals.data = apiResponse;
+        try {
 
             if (typeof apiResponse === 'object') {
 
@@ -65,15 +62,15 @@ export default class ResController {
                 else
                     await this.true(req, res, apiResponse)
 
-
             } else {
+
                 await this.false(req, res, apiResponse);
             }
 
+            await MongoLogging(req, res);
 
+        } catch (err) {
 
-
-        } catch(err) {
             await this.err(req, res, err);
         }
 
@@ -92,13 +89,15 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        // await MongoLogging(req, res);
+        await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);
 
-    }
+        await MongoLogging(req, res);
 
+
+    }
 
 
     public async true<T>(req: Request, res: express.Response, dto?: T) {
@@ -140,7 +139,6 @@ export default class ResController {
     }
 
 
-
     public async err<T>(req: Request, res: express.Response, err: string) {
 
         let dto = {
@@ -156,6 +154,7 @@ export default class ResController {
         // await MongoLogging(req, res);
 
         res.type('application/json');
+
         return res.status(200).json(dto);
 
     }

@@ -8,46 +8,44 @@ import Config from "../../config";
 // todo docker : 몽고 자동 실행 확인하기.
 // todo 완전 개선 필요
 const logger = async (req: Request, res: Response) => {
+    const { method, url, body, query, params } = req;
+    const { statusCode, statusMessage } = res;
+    const headers = res.getHeaders();
 
-    const {method, url, body, query, params} = req;
-    const { statusCode, statusMessage } = res; // 추가: 응답 데이터를 가져옴
-    const headers = res.getHeaders(); // 수정: res.getHeaders()를 사용하여 헤더 가져오기
+    try {
+        const db = await Mongo();
+        if (!db) {
+            throw new Error('DB connection is not available');
+        }
 
-    const db = await Mongo(); // db 값을 가져옴
+        const collection = db.collection('log_reply_' + Config.SERVER_TYPE.toLowerCase());
 
+        const log = {
+            method,
+            path: '/api' + url,
+            body,
+            query,
+            params,
+            response: {
+                statusCode,
+                statusMessage,
+                headers,
+                data: res.locals.data
+            },
+            timestamp: new Date(),
+        };
 
-    if (!db) {
-        throw new Error('DB connection is not available');
+        const result = await collection.insertOne(log);
+
+        if (result.acknowledged === true) {
+            Logger.info('API log saved to MongoDB');
+        } else {
+            Logger.error('Failed to save API log to MongoDB');
+        }
+    } catch (err) {
+        Logger.error('Failed to connect to MongoDB:', err);
+        // 여기서 적절한 에러 처리를 수행하거나, 대체 로깅 메커니즘을 사용할 수 있습니다.
     }
-
-    const collection = db.collection('log_reply_' + Config.SERVER_TYPE.toLowerCase());
-
-    const log = {
-        method,
-        path: '/api' + url,
-        body,
-        query,
-        params,
-        response: { // 추가: 응답 데이터를 로그에 추가
-            statusCode,
-            statusMessage,
-            headers,
-            data: res.locals.data
-        },
-        timestamp: new Date(),
-    };
-
-    const result = await collection.insertOne(log);
-
-    let mongoResult = result.acknowledged;
-
-    if(mongoResult === true)
-        Logger.info('API log saved to MongoDB');
-    else
-        Logger.error(mongoResult);
-
-
-
 };
 
 
