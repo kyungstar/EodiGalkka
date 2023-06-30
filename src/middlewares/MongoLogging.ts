@@ -4,9 +4,6 @@ import Logger from "../modules/Logger";
 import Config from "../../config";
 
 
-// todo KYG :  몽고 커넥션 없을 떄도 처리하도록 해야한다.
-// todo docker : 몽고 자동 실행 확인하기.
-// todo 완전 개선 필요
 const logger = async (req: Request, res: Response) => {
     const { method, url, body, query, params } = req;
     const { statusCode, statusMessage } = res;
@@ -44,7 +41,6 @@ const logger = async (req: Request, res: Response) => {
         }
     } catch (err) {
         Logger.error('Failed to connect to MongoDB:', err);
-        // 여기서 적절한 에러 처리를 수행하거나, 대체 로깅 메커니즘을 사용할 수 있습니다.
     }
 };
 

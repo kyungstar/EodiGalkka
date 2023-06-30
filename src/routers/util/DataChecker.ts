@@ -150,7 +150,7 @@ class DataChecker extends ResController {
 
         }
 
-        for (const item of strArr) {
+        for (const item of strNeedArr) {
 
             if ((objData[item] === '' || objData[item] === undefined))
                 dataFailList.push(item);

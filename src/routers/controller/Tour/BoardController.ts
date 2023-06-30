@@ -17,7 +17,7 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["boardSeq"]),
+            DataChecker.numberCheck(res, req.body, [],["boardSeq"]),
             DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number
@@ -44,8 +44,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["boardType"]),
-            DataChecker.numberArrCheck(res, req.body, ["page"], 1, false)
+            DataChecker.stringCheck(res, req.body, [],["boardType"]),
+            DataChecker.numberCheck(res, req.body, ["page"],[], 0)
         ) as {
             boardType: string,
             page: number
@@ -72,9 +72,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ["boardType", "title", "contents"], true),
-            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
-            DataChecker.numberArrCheck(res, req.body, ["targetSeq"], 0,true),
+            DataChecker.stringCheck(res, req.body, ["fileList","contents"], ["boardType", "title"]),
+            DataChecker.numberCheck(res, req.body, [], ["targetSeq"]),
             DataChecker.loadJWTValue(req.body)
 
         ) as {
@@ -106,9 +105,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ["boardSeq", "boardType", "title", "contents"], true),
-            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
-            DataChecker.numberArrCheck(res, req.body, ["targetSeq"], 0,true)
+            DataChecker.numberCheck(res, req.body, [], ["boardSeq", "targetSeq"]),
+            DataChecker.stringCheck(res, req.body, ["contents", "fileList"], ["boardType","title"]),
         ) as {
             boardSeq: number,
             userId: string,
@@ -139,8 +137,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ["boardSeq"], true),
-            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
+            DataChecker.numberCheck(res, req.body, [], ["boardSeq"]),
+            DataChecker.stringCheck(res, req.body, ["fileList"], []),
             DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number,
@@ -169,7 +167,7 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ["boardSeq"], true),
+            DataChecker.numberCheck(res, req.body, [], ["boardSeq"]),
             DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number,
@@ -198,7 +196,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["boardSeq", "reply"]),
+            DataChecker.numberCheck(res, req.body, [], ["boardSeq"]),
+            DataChecker.stringCheck(res, req.body, [], ["reply"]),
             DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number,
@@ -227,8 +226,8 @@ class BoardController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["boardSeq", "boardType", "reportContents"]),
-            DataChecker.stringArrCheck(res, req.body, ["fileList"], false),
+            DataChecker.numberCheck(res, req.body, [], ["boardSeq"]),
+            DataChecker.stringCheck(res, req.body, ["reportContents", "fileList"], ["boardType"]),
             DataChecker.loadJWTValue(req.body)
         ) as {
             boardSeq: number,
