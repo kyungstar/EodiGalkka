@@ -67,8 +67,8 @@ class TravelController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ['targetSeq', 'targetType']),
-            DataChecker.stringArrCheck(res, req.body, [], false)
+            DataChecker.numberCheck(res, req.body, [],["targetSeq"]),
+            DataChecker.stringCheck(res, req.body, [], ["targetType"])
         ) as {
             targetSeq: number,
             targetType: string
@@ -133,7 +133,7 @@ class TravelController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ['targetType'], false)
+            DataChecker.stringCheck(res, req.body, [], ["targetType"])
         ) as {
             targetType: string
         };

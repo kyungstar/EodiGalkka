@@ -19,8 +19,7 @@ class UserController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["authType", "authPwd"]),
-            DataChecker.stringArrCheck(res, req.body, ["loginId", "email"], false)
+            DataChecker.stringCheck(res, req.body, ["loginId", "email"],["authType", "authPwd"])
         ) as {
             authType: string,
             email: string,
@@ -53,8 +52,7 @@ class UserController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body,["authType"], true),
-            DataChecker.stringArrCheck(res, req.body,["loginId", "email"], false)
+            DataChecker.stringCheck(res, req.body, ["loginId", "email"], ["authType"])
         ) as {
             loginId: string,
             authType: string,
@@ -83,12 +81,9 @@ class UserController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, [
-                "loginId", "pwd", "userType", "email", "phoneNumber", "gender", "name"
-            ]),
-            DataChecker.stringArrCheck(res, req.body, [
-                "address", "addressDetail", "nickName"
-            ], false)
+            DataChecker.stringCheck(res, req.body,
+                ["email", "address", "addressDetail", "nickName"]
+                , ["loginId", "pwd", "userType", "phoneNumber", "gender", "name"])
         ) as {
             loginId: string,
             pwd: string,
@@ -122,7 +117,7 @@ class UserController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.stringArrCheck(res, req.body, ["loginId", "pwd"], true)
+            DataChecker.stringCheck(res, req.body, [], ["loginId", "pwd"])
         ) as {
             loginId: string,
             pwd: string
@@ -152,7 +147,7 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ["email", "userType"])
+                DataChecker.stringCheck(res, req.body, [], ["email", "userType"])
             ) as {
                 email: string,
                 userType: string
@@ -164,11 +159,11 @@ class UserController extends ResController {
 
             let emailCheckResult = await UserService.emailCheck(data.email, data.userType);
 
-            this.resultInterpreter(req, res, emailCheckResult);
+            await this.resultInterpreter(req, res, emailCheckResult);
 
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -178,23 +173,23 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['phoneNumber', 'userType'])
+                DataChecker.stringCheck(res, req.body, [],['phoneNumber', 'userType'])
             ) as {
                 phoneNumber: string,
                 userType: string
             }
 
             if (typeof data == 'string') {
-                this.clientReqError(req, res, data);
+                await this.clientReqError(req, res, data);
             }
 
             let phoneCheckResult = await UserService.phoneCheck(data.phoneNumber, data.userType);
 
-            this.resultInterpreter(req, res, phoneCheckResult)
+            await this.resultInterpreter(req, res, phoneCheckResult)
 
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -204,7 +199,7 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['newPwd']),
+                DataChecker.stringCheck(res, req.body, [],['newPwd']),
                 DataChecker.loadJWTValue(req.body)
             ) as {
                 newPwd: string,
@@ -217,10 +212,10 @@ class UserController extends ResController {
 
             let userPwdUpdate = await UserService.updatePwd(data.userId, data.newPwd);
 
-            this.resultInterpreter(req, res, userPwdUpdate)
+            await this.resultInterpreter(req, res, userPwdUpdate)
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
     }
 
@@ -230,7 +225,7 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['loginId', 'pwd'])
+                DataChecker.stringCheck(res, req.body, [], ["loginId", "pwd"])
             ) as {
                 loginId: string,
                 pwd: string
@@ -242,10 +237,10 @@ class UserController extends ResController {
 
             let userPwdAuth = await UserService.authPwd(data.loginId, data.pwd);
 
-            this.resultInterpreter(req, res, userPwdAuth)
+            await this.resultInterpreter(req, res, userPwdAuth)
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
     }
 
@@ -255,8 +250,7 @@ class UserController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['loginId']),
-                DataChecker.stringArrCheck(res, req.body, ['email', 'phoneNumber', 'address', 'addressDetail'], false)
+                DataChecker.stringCheck(res, req.body, ["email", "address", "addressDetail"], ["loginId", "phoneNumber"])
             ) as {
                 loginId: string,
                 email: string,
@@ -270,7 +264,7 @@ class UserController extends ResController {
             }
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
     }
 

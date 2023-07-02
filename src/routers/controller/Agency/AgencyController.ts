@@ -16,13 +16,9 @@ class AgencyController extends ResController {
 
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, [
-                "loginId", "pwd", "email", "phoneNumber", "gender"
-                , "name", "agencyName", "joinReason", "userType"
-            ]),
-            DataChecker.stringArrCheck(res, req.body, [
-                "address", "addressDetail", "nickName"
-            ], false)
+            DataChecker.stringCheck(res, req.body,
+                ["gender", "name", "joinReason", "address", "addressDetail", "nickName"],
+                ["loginId", "pwd", "email", "phoneNumber", "userType", "agencyName", "gender"])
         ) as {
             loginId: string,
             pwd: string,
@@ -61,9 +57,7 @@ class AgencyController extends ResController {
 
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, [
-                "loginId", "pwd"
-            ])
+            DataChecker.stringCheck(res, req.body, [], ["loginId", "pwd"])
         ) as {
             loginId: string,
             pwd: string
@@ -90,7 +84,7 @@ class AgencyController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['email', 'userType'])
+                DataChecker.stringCheck(res, req.body, [],['email', 'userType'])
             ) as {
                 email: string,
                 userType: string
@@ -102,11 +96,11 @@ class AgencyController extends ResController {
 
             let emailCheckResult = await AgencyService.emailCheck(data.email, data.userType);
 
-            this.resultInterpreter(req, res, emailCheckResult);
+            await this.resultInterpreter(req, res, emailCheckResult);
 
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }
@@ -116,23 +110,23 @@ class AgencyController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.needArrCheck(res, req.body, ['phoneNumber', 'userType'])
+                DataChecker.stringCheck(res, req.body, [],['phoneNumber', 'userType'])
             ) as {
                 phoneNumber: string,
                 userType: string
             }
 
             if (typeof data == 'string') {
-                this.clientReqError(req, res, data);
+                await this.clientReqError(req, res, data);
             }
 
             let phoneCheckResult = await AgencyService.phoneCheck(data.phoneNumber, data.userType);
 
-            this.resultInterpreter(req, res, phoneCheckResult)
+            await this.resultInterpreter(req, res, phoneCheckResult)
 
 
         } catch (err) {
-            this.errInterpreter(req, res, err);
+            await this.errInterpreter(req, res, err);
         }
 
     }

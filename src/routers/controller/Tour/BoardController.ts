@@ -45,7 +45,7 @@ class BoardController extends ResController {
 
         let data = DataChecker.mergeObject(
             DataChecker.stringCheck(res, req.body, [],["boardType"]),
-            DataChecker.numberCheck(res, req.body, ["page"],[], 0)
+            DataChecker.numberCheck(res, req.body, ["page"],[], 1)
         ) as {
             boardType: string,
             page: number

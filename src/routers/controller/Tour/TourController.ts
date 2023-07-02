@@ -65,20 +65,6 @@ class TourController extends ResController {
     public world = async (req: Request, res: Response) => {
         Logger.info("Call API - " + req.originalUrl);
 
-        let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, []),
-            DataChecker.stringArrCheck(res, req.body, [], false)
-        ) as {
-            authType: string,
-            email: string,
-            loginId: string,
-            authPwd: string
-        };
-
-        if (typeof data == 'string') {
-            return this.clientReqError(req, res, data);
-        }
-
         try {
 
             const worldList = await WorldService.worldList();
@@ -134,8 +120,7 @@ class TourController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["worldSeq"]),
-            DataChecker.stringArrCheck(res, req.body, [], false)
+            DataChecker.numberCheck(res, req.body, [],["worldSeq"])
         ) as {
             worldSeq: number
         };
@@ -199,8 +184,7 @@ class TourController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["continentsSeq"]),
-            DataChecker.stringArrCheck(res, req.body, [], false)
+            DataChecker.numberCheck(res, req.body, [],["continentsSeq"])
         ) as {
             continentsSeq: number
         };
@@ -264,8 +248,8 @@ class TourController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["travelSeq", "targetKeyword", "sort"]),
-            DataChecker.numberArrCheck(res, req.body, ["page"], 1, false),
+            DataChecker.numberCheck(res, req.body, ["page"],["travelSeq"], 1),
+            DataChecker.stringCheck(res, req.body, [],["targetKeyword", "sort"])
         ) as {
             travelSeq: number,
             targetKeyword: string,
@@ -328,7 +312,7 @@ class TourController extends ResController {
         Logger.info("Call API - " + req.originalUrl);
 
         let data = DataChecker.mergeObject(
-            DataChecker.needArrCheck(res, req.body, ["countrySeq"])
+            DataChecker.numberCheck(res, req.body, [],["countrySeq"])
         ) as {
             countrySeq: number
         };
