@@ -159,5 +159,4 @@ class TravelController extends ResController {
 }
 
 
-
 export default new TravelController();

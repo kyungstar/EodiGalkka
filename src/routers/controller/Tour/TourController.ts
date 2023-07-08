@@ -338,5 +338,4 @@ class TourController extends ResController {
 }
 
 
-
 export default new TourController();

@@ -69,7 +69,7 @@ class FileController extends ResController {
         try {
 
             let data = DataChecker.mergeObject(
-                DataChecker.stringArrCheck(res, req.query, ['filePath'], true)
+                DataChecker.stringCheck(res, req.query, [], ["filePath"])
             ) as {
                 filePath: string,
             }
