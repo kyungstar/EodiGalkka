@@ -2,7 +2,10 @@ import {Request, Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 import Config from "../../config";
 
-// TODO 완전 개선이 필요하다.
+/* TODO
+    1. refresh Token 활성화.
+    2. refresh Token은 Redis를 활용하도록 한다.
+*/
 export class JwtModel {
 
     u: string;

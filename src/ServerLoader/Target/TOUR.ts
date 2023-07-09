@@ -6,12 +6,11 @@ import Config from "../../../config";
 import router from "../../Routers/Controller";
 import Logger from "../../modules/Logger";
 import cookieParser from "cookie-parser";
+import Redis from 'ioredis';
 
 const path = require('path');
 
 const tourControllerPath = path.resolve(__dirname, '../../routers/controller/Tour/*.ts');
-
-console.log(tourControllerPath);
 
 const app = express();
 
