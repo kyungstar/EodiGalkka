@@ -68,9 +68,3 @@
 가이드 여행 글 작성
 - 가이드가 여행 게시물을 작성하여 모집할 수 있습니다.
 - Spring은 Spring Boot, Spring MVC, Spring Data JPA 등을 사용하여 서버 측 유효성 검사, 데이터 저장 및 사용자 인증 기능을 제공할 수 있습니다.
-
-
-# MSA
-- Nodejs 기반 - 생성 및 채팅서비스에 활용된다.
-- Java Spring Boot 기반 - 조회 서비스에 활용되도록 한다.
-
