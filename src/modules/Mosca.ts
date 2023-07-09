@@ -12,11 +12,11 @@ class Mosca {
 
         this.server.on("ready", () => {
             console.log(this.server.opts.host)
-            Logger.info("MQTT Server Ready - " + (this.server.opts.host || "tcp://127.0.0.1") + ":" + this.server.opts.port);
+            Logger.info("MQTT Server Ready - " + this.server.opts.host + ":" + this.server.opts.port);
         });
 
         this.server.on("connect", () => {
-            Logger.info("MQTT Server Connected - " + (this.server.opts.host || "tcp://127.0.0.1") + ":" + this.server.opts.port);
+            Logger.info("MQTT Server Connected - " + this.server.opts.host + ":" + this.server.opts.port);
         });
 
         this.server.on("subscribed", (topic: string, client: mosca.Client) => {
