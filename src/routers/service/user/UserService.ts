@@ -8,6 +8,7 @@ import {createToken, JwtModel} from "../../../middlewares/JwtAuth";
 import ResultBox from "../../dto/ResultBox";
 import DataChecker from "../../util/DataChecker";
 import SecurityAuth from "../../../middlewares/SecurityAuth";
+import redisClient from "../../../modules/Redis";
 
 
 const escape = require('mysql').escape;
@@ -216,6 +217,7 @@ export default class UserService extends ResultBox {
             let result = await DB.Executer(QM.Update("t_node_login", {try_cnt: 0}, {user_id: loginData.user_id}))
 
             if (result) {
+                // Redis.
                 const token = createToken(new JwtModel(({u: userData.user_id, t: userData.user_type} as JwtModel)));
 
                 return this.ObjTrue('01', [{token: token}]);
