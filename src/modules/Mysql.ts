@@ -164,14 +164,13 @@ class MariaDB {
         try {
 
             let result = await conn.query(statement.trim());
-
             await conn.commit();
             await conn.release();
 
             Logger.debug("Query result - " + (!!result));
             Logger.debug(statement);
 
-            return result.insertId;
+            return Number(result.insertId);
 
         } catch (err) {
             await conn.rollback();

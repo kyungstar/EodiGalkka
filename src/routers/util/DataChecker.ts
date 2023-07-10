@@ -64,7 +64,6 @@ class DataChecker extends ResController {
         let dataFailList: string[] = [];
 
         for (const item of strArr) {
-
             retObj[item] = objData[item].toString();
 
         }
@@ -74,10 +73,12 @@ class DataChecker extends ResController {
             if ((objData[item] === '' || objData[item] === undefined || objData[item] === 'null'))
                 dataFailList.push(item);
 
+            if (dataFailList.length > 0)
+                break;
+
             retObj[item] = objData[item].toString();
 
         }
-
 
         if (dataFailList.length > 0)
             return dataFailList + ' Is Essential Data';
@@ -115,6 +116,7 @@ class DataChecker extends ResController {
     // objList는 병합할 객체의 리스트를 나타냅니다.
     public mergeObject(...objList: any[]) {
         let obj = {};
+
 
         for (let item of objList) {
             if (typeof item === "string") {

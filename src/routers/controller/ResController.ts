@@ -80,7 +80,6 @@ export default class ResController {
     // T는 Type의 약자로 다른 언어에서도 제네릭을 선언할 때 관용적으로 많이 사용된다. 이 부분에는 식별자로 사용할 수 있는 것이라면 무엇이든 들어갈 수 있다.
     public async clientReqError<T>(req: Request, res: express.Response, msg: string) {
 
-
         let dto = {
             result: false,
             code: 'CUP',
@@ -89,13 +88,9 @@ export default class ResController {
 
         // Mongo Log
         res.locals.data = dto;
-        await MongoLogging(req, res);
 
         res.type('application/json');
         return res.status(200).json(dto);
-
-        await MongoLogging(req, res);
-
 
     }
 
