@@ -66,6 +66,9 @@ web_modules/
 # Optional REPL history
 .node_repl_history
 
+#Security
+../config/Security.ts
+
 # Output of 'npm pack'
 *.tgz
 
