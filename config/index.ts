@@ -1,6 +1,14 @@
 import {HASH, JWT, LOG, MONGO, MYSQL, SMS_PAY, SECURITY, SERVER, SMTP} from "./Security";
 
 const targetConfig = {
+    "PROTOCOL":{
+        "DEV":{
+            "PROTOCOL": SERVER.DEV_PROTOCOL
+        },
+        "REL":{
+            "PROTOCOL": SERVER.PROTOCOL
+        },
+    },
     "SERVER": {
         "TYPE": SERVER.TYPE,
         "PORT": SERVER.PORT
