@@ -1,13 +1,72 @@
 import {HASH, JWT, LOG, MONGO, MYSQL, SMS_PAY, SECURITY, SERVER, SMTP} from "./Security";
 
-const targetConfig = {
-    "PROTOCOL":{
-        "DEV":{
-            "PROTOCOL": SERVER.DEV_PROTOCOL
-        },
-        "REL":{
-            "PROTOCOL": SERVER.PROTOCOL
-        },
+
+export const RUN_MODE = process.argv[3]
+
+
+interface LogConfig {
+    PATH: string;
+    LEVEL: string;
+    FILE_SIZE: number;
+    FILE_CNT: number;
+}
+
+interface Config {
+    PROTOCOL: {
+        [key: string]: SERVER;
+    };
+    SERVER: {
+        TYPE: SERVER;
+        PORT: SERVER;
+    };
+    DB: {
+        [key: string]: {
+            "MONGO": {
+                "URL": MONGO
+            },
+            "MYSQL": {
+                "HOST": MYSQL,
+                "PORT": MYSQL,
+                "USER": MYSQL,
+                "PASSWORD": MYSQL,
+                "DATABASE": MYSQL,
+                "CONNECTION_LIMIT": MYSQL
+            },
+            "SECURITY": {
+                "KEY": SECURITY
+            }
+        };
+    },
+    LOG: LogConfig,
+    JWT: {
+        [key: string]: {
+            SECRET_KEY: JWT,
+            EXPIRES_IN: JWT
+        }
+    },
+    SMTP: {
+        USER_EMAIL: SMTP,
+        USER_PASSWD: SMTP
+    },
+    PAY: {
+        SMS: {
+            URL: SMS_PAY,
+            MERCHANT_KEY: SMS_PAY
+        }
+    },
+    HASH: {
+        ITERATIONS: HASH,
+        KEY_LENGTH: HASH,
+        DIGEST: HASH,
+        KEY: HASH
+    }
+}
+
+
+const targetConfig: Config = {
+    "PROTOCOL": {
+        "DEV": SERVER.DEV_PROTOCOL,
+        "REL": SERVER.PROTOCOL
     },
     "SERVER": {
         "TYPE": SERVER.TYPE,
@@ -47,14 +106,16 @@ const targetConfig = {
             }
         },
     },
+    LOG,
     "JWT": {
         "DEV": {
-            "SECRET_KEY": JWT.DEV_SECRET_KEY
+            "SECRET_KEY": JWT.DEV_SECRET_KEY,
+            "EXPIRES_IN": JWT.EXPIRES_IN
         },
         "REL": {
-            "SECRET_KEY": JWT.SECRET_KEY
+            "SECRET_KEY": JWT.SECRET_KEY,
+            "EXPIRES_IN": JWT.EXPIRES_IN
         },
-        "EXPIRES_IN": JWT.EXPIRES_IN
     },
     "SMTP": {
         "USER_EMAIL": SMTP.USER_EMAIL,
@@ -65,12 +126,6 @@ const targetConfig = {
             "URL": SMS_PAY.URL,
             "MERCHANT_KEY": SMS_PAY.MERCHANT_KEY
         }
-    },
-    "LOG": {
-        "PATH": LOG.PATH,
-        "LEVEL": LOG.LEVEL,
-        "FILE_SIZE": LOG.FILE_SIZE,
-        "FILE_CNT": LOG.FILE_CNT
     },
     "HASH": {
         "ITERATIONS": HASH.ITERATIONS,
