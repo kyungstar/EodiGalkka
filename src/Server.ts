@@ -2,7 +2,9 @@ import express from "express";
 import {AddressInfo} from "net";
 import formData from "express-form-data";
 
+
 import Logger from "./modules/middlewares/Logger";
+import router from "./routers/api";
 
 // Config.json 파일 가져오기
 import Config, {RUN_MODE} from "../config";
@@ -34,6 +36,9 @@ app.use(formData.union());
 
 app.get('/', (req, res) => res.status(200).end());
 app.head('/', (req, res) => res.status(200).end());
+
+// Routing
+app.use("/", router);
 
 const server = app.listen(Config.SERVER.PORT, () => {
     const {address, port} = server.address() as AddressInfo;
