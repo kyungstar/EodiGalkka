@@ -1,26 +1,24 @@
-import Ajv, { Schema } from 'ajv';
-import { Request, Response } from 'express';
+import Ajv, {Schema} from 'ajv';
+import {Request, Response} from 'express';
 import Logger from '../modules/middlewares/Logger';
 
 const ajv = new Ajv(); // Ajv 인스턴스 생성
 
 class DataValidator {
     private req?: Request;
+    private res?: Response;
     private schema?: Schema;
 
-    // req 설정 메서드 추가
-    public setRequest(req: Request, schema: Schema) {
-        this.req = req;
-        this.schema = schema;
-    }
-
-    public initRequest(req: Request, schema: Schema) {
+    public initRequest(req: Request, res: Response, schema: Schema) {
 
         Logger.info("Received API Call : " + req.originalUrl);
         Logger.info("Received Body : " + JSON.stringify(req.body));
 
         this.req = req;
+        this.res = res;
         this.schema = schema;
+
+        return true;
     }
 
     private validate(schema: Schema, obj: any) {
@@ -36,13 +34,16 @@ class DataValidator {
         }
     }
 
+
+    // number 추가 작업 진행해야함
     public numberTypeCheck(numberArr: string[]) {
 
     }
 
     public stringArrCheck(strArr: string[]) {
 
-        let retObj: { [key: string]: any } = {};
+        //let retObj: { [key: string]: any } = {};
+        let retObj: Record<string, any> = {};
 
         for (let item of strArr) {
             if (this.req && this.req.body && this.req.body[item] !== undefined) {
@@ -53,7 +54,8 @@ class DataValidator {
         return retObj;
     }
 
-    public schemaCheck(...objList: any[]) {
+    public schemaCheck<T>(...objList: any[]) {
+
         let obj = {};
 
         for (let item of objList) {
@@ -64,14 +66,23 @@ class DataValidator {
             Object.assign(obj, item);
         }
 
-        const targetObj = this.validate(this.schema, obj);
-
-        if(targetObj === true)
-            return obj;
-        else
-            return targetObj;
+        return obj;
 
     }
+
+
+    public vailateResult<T>(objList: object) {
+
+        const targetObj = this.validate(this.schema, objList);
+
+        if(targetObj === true)
+            return true;
+
+        Logger.error(targetObj);
+        return false;
+
+    }
+
 }
 
 export default new DataValidator();
