@@ -21,7 +21,7 @@ class DataValidator {
         return true;
     }
 
-    private validate(schema: Schema, obj: any) {
+    private checkValidate(schema: Schema, obj: any) {
         if (!this.req) {
             throw new Error('Request (req) is not set. Call setRequest() to set the request object.');
         }
@@ -36,11 +36,11 @@ class DataValidator {
 
 
     // number 추가 작업 진행해야함
-    public numberTypeCheck(numberArr: string[]) {
+    public checkNumber(numberArr: string[]) {
 
     }
 
-    public stringArrCheck(strArr: string[]) {
+    public checkString(strArr: string[]) {
 
         //let retObj: { [key: string]: any } = {};
         let retObj: Record<string, any> = {};
@@ -54,7 +54,7 @@ class DataValidator {
         return retObj;
     }
 
-    public schemaCheck<T>(...objList: any[]) {
+    public checkSchema<T>(...objList: any[]) {
 
         let obj = {};
 
@@ -71,9 +71,9 @@ class DataValidator {
     }
 
 
-    public vailateResult<T>(objList: object) {
+    public checkResult<T>(objList: object) {
 
-        const targetObj = this.validate(this.schema, objList);
+        const targetObj = this.checkValidate(this.schema, objList);
 
         if(targetObj === true)
             return true;
