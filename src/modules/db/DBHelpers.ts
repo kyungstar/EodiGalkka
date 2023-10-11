@@ -1,7 +1,7 @@
 import mariadb from "mariadb";
 import Config, {RUN_MODE} from "../../../config";
 import Logger from "../middlewares/Logger";
-import {query} from "express";
+import {decryptColumnList, encryptColumnList} from "../../../config/Security";
 
 const escape = require('sqlstring').escape;
 
@@ -36,6 +36,7 @@ class MariaDB<T> {
 
 
     private async executeQuery(query: string): Promise<string | null> {
+
         const conn = await this.cluster.getConnection();
 
         try {
@@ -44,7 +45,7 @@ class MariaDB<T> {
 
             return result?.affectedRows;
         } catch (err) {
-            Logger.error(err);
+            Logger.error("executeQuery Err " + query + " : err");
             await conn.release();
 
         } finally {
@@ -52,52 +53,22 @@ class MariaDB<T> {
         }
     }
 
-    async findOne(tblName: string, whereObj: any, decryptSelectObj: any = {}, selectList: string[] = []) {
+    async findOne(tblName: string, whereObj: any, selectList: string[] = []) {
 
         let conn = await this.cluster.getConnection();
 
-        let query =
-            " SELECT ";
+        const selectQuery: string = this.buildSelectColumns(tblName, selectList);
 
-        if (selectList.length === 0) {
-            query += " * "
-        } else {
-            for (let item of selectList) {
-                if (item === '\\')
-                    query += ` AND CONVERT(AES_DECRYPT(UNHEX(${escape(item)}),`.replace(/'/g, "") + escape(Config.DB[RUN_MODE].SECURITY.KEY) + ") USING utf8) as " + item;
-                else
-                    query += item + ','
-            }
-        }
+        const whereQuery: string = this.buildWhereClause(whereObj)
 
+        const query: string = selectQuery + whereQuery;
 
-        query = query.slice(0, -1);
-
-        query += " " +
-            "   FROM " + tblName +
-            "   WHERE 1 = 1 ";
-
-        for (let k in decryptSelectObj) {
-            query += ` AND CONVERT(AES_DECRYPT(UNHEX(${escape(k)}),`.replace(/'/g, "") + escape(Config.DB[RUN_MODE].SECURITY.KEY) + ") USING utf8) = " + escape(decryptSelectObj[k]);
-
-        }
-
-        for (let k in whereObj) {
-
-            // Decrypt 쿼리 Function을 사용할 때
-            if (whereObj[k][0] === '\\')
-                query += " AND  " + whereObj[k].slice(1, whereObj[k].length);
-            else
-                query += " AND " + k + " = " + escape(whereObj[k]);
-        }
+        Logger.debug("findOne : " + query);
 
         try {
 
-            Logger.info("SELECT Query : " + query);
-
             const result = await conn.query(query);
             await conn.release();
-
 
             return result ? result[0] : null;
 
@@ -109,40 +80,19 @@ class MariaDB<T> {
             await conn.release();
         }
 
-
     }
 
-    async findAll(tblName: string, selectObj: Record<string, T>, selectList: string[], addQuery?: string) {
+    async findAll(tblName: string, whereObj: any, selectList: string[], addQuery?: string) {
 
         let conn = await this.cluster.getConnection();
 
-        let query =
-            " SELECT ";
+        const selectQuery: string = this.buildSelectColumns(tblName, selectList);
 
-        if (selectList.length === 0) {
-            query += " * "
-        } else {
-            for (let item of selectList) {
-                query += item + ','
-            }
-        }
+        const whereQuery: string = this.buildWhereClause(whereObj)
 
+        const query: string = selectQuery + whereQuery;
 
-        query = query.slice(0, -1);
-
-        query += " " +
-            "   FROM " + tblName +
-            "   WHERE 1 = 1 ";
-
-
-        for (let k in selectObj) {
-            query += " AND " + k + " = " + escape(selectObj[k]);
-        }
-
-        if (addQuery)
-            query += " " + addQuery;
-
-        Logger.debug(`findAll Query: ${query}`);
+        Logger.debug("findAll : " + query);
 
         try {
             const result = await conn.query(query);
@@ -160,6 +110,46 @@ class MariaDB<T> {
 
     }
 
+
+
+    private buildSelectColumns(tblName: string, selectList: string[]) {
+
+        let query: string = `SELECT `;
+
+
+        if (selectList.length === 0) {
+            query += ' * ';
+        } else {
+            for (let selectData of selectList) {
+                if (decryptColumnList.includes(selectData))
+                    query += this.decrypt(selectData);
+                else
+                    query += selectData + ','
+            }
+        }
+
+        query = query.slice(0, -1);
+
+        query += `FROM ${tblName}`;
+
+        return query
+    }
+
+    private buildWhereClause(whereObj: object[]) {
+
+        let query = "WHERE 1 = 1 "
+
+        for (let column in whereObj) {
+
+            if (encryptColumnList.includes(column))
+                query += ` AND ` + this.decrypt(column);
+            else
+                query += " AND " + column + " = " + escape(whereObj[column]);
+
+        }
+
+        return query;
+    }
 
     async update(tblName: string, updateObj: Record<string, T>, whereObj: Record<string, T>, transaction: boolean = false) {
 
@@ -234,17 +224,23 @@ class MariaDB<T> {
             " UPDATE " + tblName + " SET ";
 
         for (let k in updateObj) {
-            query += k + " = " + escape(updateObj[k]);
+            if(encryptColumnList.includes(k))
+                query += k + this.encrypt(updateObj[k])
+            else
+                query += k + " = " + escape(updateObj[k]);
         }
 
         query += " " +
             "   WHERE 1 = 1 ";
 
         for (let k in whereObj) {
-            query += " AND " + k + " = " + escape(whereObj[k]);
+            if(decryptColumnList.includes(k))
+                query += k + this.encrypt(whereObj[k])
+            else
+                query += k + " = " + escape(whereObj[k]);
         }
 
-        Logger.debug(`Update Query: ${query}`);
+        Logger.info(`Update Query: ${query}`);
 
         return query;
     }
@@ -299,24 +295,24 @@ class MariaDB<T> {
     }
 
 
-    encrypt<T>(targetObj: T) {
+    private encrypt(targetObj: any) {
 
-        const query = `\\(HEX(AES_ENCRYPT(${escape(targetObj)}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)})))`;
+        const query = ` (HEX(AES_ENCRYPT(${escape(targetObj)}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)})))`;
 
         return query;
 
     }
 
-    decrypt(targetObj: any) {
+    private decrypt(targetObj: any) {
 
 
-        const query = `\\CONVERT(AES_DECRYPT(UNHEX(${Object.keys(targetObj)}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(Object.values(targetObj))}`;
+        const query = ` CONVERT(AES_DECRYPT(UNHEX(${Object.keys(targetObj)}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(Object.values(targetObj))}`;
 
-        const targetKey = Object.keys(targetObj);
-
-        return {query};
+        return query;
 
     }
+
+
 
 
 }
