@@ -30,7 +30,7 @@ class MariaDB<T> {
             collation: "utf8mb4_general_ci",
             acquireTimeout: 10000,
             dateStrings: true,
-            timezone: "Asia/Seoul",
+            timezone: "Asia/Seoul"
         });
     }
 
@@ -67,13 +67,13 @@ class MariaDB<T> {
 
         try {
 
-            const result = await conn.query(query);
+            let result = await conn.query(query);
             await conn.release();
 
-            return result ? result[0] : null;
+            return Object.keys(result).length > 0 ? result[0] : null;
 
         } catch (err) {
-            Logger.error(err);
+            Logger.error(err.message);
             await conn.release();
             return null;
         } finally {
@@ -98,7 +98,7 @@ class MariaDB<T> {
             const result = await conn.query(query);
             await conn.release();
 
-            return result ? result : null;
+            return Object.keys(result).length > 0 ? result : null;
 
         } catch (err) {
             Logger.error(err);
@@ -118,11 +118,11 @@ class MariaDB<T> {
 
 
         if (selectList.length === 0) {
-            query += ' * ';
+            query += ' *  ';
         } else {
             for (let selectData of selectList) {
                 if (decryptColumnList.includes(selectData))
-                    query += this.decrypt(selectData);
+                    query += ''//this.decrypt(selectData);
                 else
                     query += selectData + ','
             }
@@ -130,7 +130,7 @@ class MariaDB<T> {
 
         query = query.slice(0, -1);
 
-        query += `FROM ${tblName}`;
+        query += `FROM ${tblName} `;
 
         return query
     }
@@ -140,9 +140,8 @@ class MariaDB<T> {
         let query = "WHERE 1 = 1 "
 
         for (let column in whereObj) {
-
             if (encryptColumnList.includes(column))
-                query += ` AND ` + this.decrypt(column);
+                query += ` AND ` + this.decrypt(column, whereObj[column]);
             else
                 query += " AND " + column + " = " + escape(whereObj[column]);
 
@@ -303,10 +302,10 @@ class MariaDB<T> {
 
     }
 
-    private decrypt(targetObj: any) {
+    private decrypt(targetColumn: any, targetObj: any) {
 
 
-        const query = ` CONVERT(AES_DECRYPT(UNHEX(${Object.keys(targetObj)}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(Object.values(targetObj))}`;
+        const query = ` CONVERT(AES_DECRYPT(UNHEX(${targetColumn}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(targetObj)}`;
 
         return query;
 
