@@ -40,15 +40,18 @@ export default class ResHandler {
     }
 
 
-     true(code: string, res: Response) {
+     true(code: string, res: Response, targetObj?: any) {
 
-        const response = {
-            success: false,
+        let response = {
+            success: true,
             message: MyAuth.getEncryptCode(code)
         };
 
+         if(targetObj)
+             response = Object.assign(response, targetObj);
+
         Logger.info("API Response : " + JSON.stringify({
-            success: false,
+            success: true,
             message: code
         }));
 
