@@ -111,7 +111,6 @@ class MariaDB<T> {
     }
 
 
-
     private buildSelectColumns(tblName: string, selectList: string[]) {
 
         let query: string = `SELECT `;
@@ -122,7 +121,7 @@ class MariaDB<T> {
         } else {
             for (let selectData of selectList) {
                 if (decryptColumnList.includes(selectData))
-                    query += ''//this.decrypt(selectData);
+                    query += this.decrypt(selectData);
                 else
                     query += selectData + ','
             }
@@ -180,17 +179,27 @@ class MariaDB<T> {
     }
 
 
-    async insert(tblName: string, insertObj: any, option: string = "", transaction: boolean = false): Promise<string | null> {
+
+    // Insert만 예외적으로, insertId를 따른다.
+    async insert(tblName: string, insertObj: any, option: string = ""): Promise<number | null> {
+
+        let conn = await this.cluster.getConnection();
 
         const query = this.insertQuery(tblName, insertObj, option);
 
-        if (transaction) {
-            return query;
+        try {
+            const result = await conn.query(query);
+            await conn.release();
+
+            return result ? Number(result.insertId) : null;
+        } catch (err) {
+            Logger.error(err);
+            await conn.release();
+            return null;
+        } finally {
+            await conn.release();
         }
 
-        const result = await this.executeQuery(query);
-
-        return result ? result : null;
 
 
     }
@@ -202,10 +211,10 @@ class MariaDB<T> {
 
 
         for (let k in insertObj) {
-            if (insertObj[k][0] === '\\') {
-                query += k + " = " + insertObj[k].slice(1, insertObj[k].length) + ",";
-            } else
-                query += k + " = " + escape(insertObj[k]) + ",";
+            if (encryptColumnList.includes(k))
+                query += k + " = " + this.encrypt(insertObj[k]) + " ,";
+            else
+                query += k + " = " + escape(insertObj[k]) + " ,";
 
         }
 
@@ -223,7 +232,7 @@ class MariaDB<T> {
             " UPDATE " + tblName + " SET ";
 
         for (let k in updateObj) {
-            if(encryptColumnList.includes(k))
+            if (encryptColumnList.includes(k))
                 query += k + this.encrypt(updateObj[k])
             else
                 query += k + " = " + escape(updateObj[k]);
@@ -233,7 +242,7 @@ class MariaDB<T> {
             "   WHERE 1 = 1 ";
 
         for (let k in whereObj) {
-            if(decryptColumnList.includes(k))
+            if (decryptColumnList.includes(k))
                 query += k + this.encrypt(whereObj[k])
             else
                 query += k + " = " + escape(whereObj[k]);
@@ -302,16 +311,19 @@ class MariaDB<T> {
 
     }
 
-    private decrypt(targetColumn: any, targetObj: any) {
+    private decrypt(targetColumn: any, targetObj?: any) {
 
 
-        const query = ` CONVERT(AES_DECRYPT(UNHEX(${targetColumn}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(targetObj)}`;
+        let query: string;
+
+        if (targetObj)
+            query = ` CONVERT(AES_DECRYPT(UNHEX(${targetColumn}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) = ${escape(targetObj)}`;
+        else
+            query = ` CONVERT(AES_DECRYPT(UNHEX(${targetColumn}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) USING utf8) as ${targetColumn} ,`;
 
         return query;
 
     }
-
-
 
 
 }
