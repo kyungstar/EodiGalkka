@@ -7,14 +7,14 @@ import {MyAuth} from "../../modules/middlewares/SecurityAuth";
 export default class ResHandler {
 
 
-      validErr(res: express.Response) {
+    validErr(res: express.Response) {
 
         const response = {
             success: false,
             message: MyAuth.getEncryptCode("데이터 검증에 실패하였습니다.")
         };
 
-        Logger.info("API Response : " + JSON.stringify({
+        Logger.debug("API Response : " + JSON.stringify({
             success: false,
             message: "데이터 검증에 실패하였습니다."
         }));
@@ -30,7 +30,7 @@ export default class ResHandler {
             message: MyAuth.getEncryptCode(code)
         };
 
-        Logger.info("API Response : " + JSON.stringify({
+        Logger.debug("API Response : " + JSON.stringify({
             success: false,
             message: code
         }));
@@ -40,19 +40,21 @@ export default class ResHandler {
     }
 
 
-     true(code: string, res: Response, targetObj?: any) {
+    true(code: string, res: Response, targetObj?: any) {
 
         let response = {
             success: true,
             message: MyAuth.getEncryptCode(code)
         };
 
-         if(targetObj)
-             response = Object.assign(response, targetObj);
+        if (targetObj) {
+            response = {...targetObj, ...response};
+        }
 
-        Logger.info("API Response : " + JSON.stringify({
+        Logger.debug("API Response : " + JSON.stringify({
             success: true,
-            message: code
+            message: code,
+            targetObj: targetObj
         }));
 
         return res.status(200).json(response);
