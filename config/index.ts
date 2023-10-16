@@ -1,4 +1,4 @@
-import {HASH, JWT, LOG, MONGO, MYSQL, SMS_PAY, SECURITY, SERVER, SMTP} from "./Security";
+import {HASH, JWT, LOG, FILE,  MONGO, MYSQL, SMS_PAY, SECURITY, SERVER, SMTP} from "./Security";
 
 
 export const RUN_MODE = process.argv[3]
@@ -9,6 +9,12 @@ interface LogConfig {
     LEVEL: string;
     FILE_SIZE: number;
     FILE_CNT: number;
+}
+
+interface FileConfig {
+    PATH: string,
+    IMG_FILE_SIZE: number,
+    MOV_FILE_SIZE: number
 }
 
 interface Config {
@@ -59,8 +65,11 @@ interface Config {
         KEY_LENGTH: HASH,
         DIGEST: HASH,
         KEY: HASH
-    }
+    },
+    FILE: FileConfig
 }
+
+
 
 
 const targetConfig: Config = {
@@ -132,7 +141,8 @@ const targetConfig: Config = {
         "KEY_LENGTH": HASH.KEY_LENGTH,
         "DIGEST": HASH.DIGEST,
         "KEY": HASH.KEY
-    }
+    },
+    FILE
 }
 
 export default targetConfig;
