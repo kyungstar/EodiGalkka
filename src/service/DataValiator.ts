@@ -2,7 +2,7 @@ import Ajv, {Schema} from 'ajv';
 import {Request, Response} from 'express';
 import Logger from '../modules/middlewares/Logger';
 
-const ajv = new Ajv(); // Ajv 인스턴스 생성
+const ajv = new Ajv();
 
 class DataValidator {
     private req?: Request;
@@ -27,6 +27,7 @@ class DataValidator {
         }
 
         const validate = ajv.compile(schema); // 스키마를 사용하여 유효성 검사 함수 생성
+
         if (validate(obj)) {
             return true;
         } else {
@@ -37,7 +38,23 @@ class DataValidator {
 
     // number 추가 작업 진행해야함
     public checkNumber(numberArr: string[]) {
+        //let retObj: { [key: string]: any } = {};
+        let retObj: Record<string, any> = {};
 
+        for (let item of numberArr) {
+            if (this.req.method === "GET") {
+                if (this.req && this.req.query && this.req.query[item] !== undefined) {
+                    retObj[item] = Number(this.req.query[item]);
+                }
+            } else {
+                if (this.req && this.req.body && this.req.body[item] !== undefined) {
+                    retObj[item] = Number(this.req.body[item]);
+                }
+            }
+
+        }
+
+        return retObj;
     }
 
     public checkString(strArr: string[]) {
@@ -46,8 +63,14 @@ class DataValidator {
         let retObj: Record<string, any> = {};
 
         for (let item of strArr) {
-            if (this.req && this.req.body && this.req.body[item] !== undefined) {
-                retObj[item] = this.req.body[item];
+            if (this.req.method === "GET") {
+                if (this.req && this.req.query && this.req.query[item] !== undefined) {
+                    retObj[item] = this.req.query[item];
+                }
+            } else {
+                if (this.req && this.req.body && this.req.body[item] !== undefined) {
+                    retObj[item] = this.req.body[item];
+                }
             }
         }
 
@@ -66,6 +89,8 @@ class DataValidator {
             Object.assign(obj, item);
         }
 
+        Object.assign(obj, this.req.body);
+
         return obj;
 
     }
@@ -75,7 +100,7 @@ class DataValidator {
 
         const targetObj = this.checkValidate(this.schema, objList);
 
-        if(targetObj === true)
+        if (targetObj === true)
             return true;
 
         Logger.error(targetObj);
