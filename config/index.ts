@@ -1,4 +1,5 @@
 import {HASH, JWT, LOG, FILE,  MONGO, MYSQL, SMS_PAY, SECURITY, SERVER, SMTP} from "./Security";
+import {string} from "joi";
 
 
 export const RUN_MODE = process.argv[3]
@@ -31,12 +32,12 @@ interface Config {
                 "URL": MONGO
             },
             "MYSQL": {
-                "HOST": MYSQL,
-                "PORT": MYSQL,
-                "USER": MYSQL,
-                "PASSWORD": MYSQL,
-                "DATABASE": MYSQL,
-                "CONNECTION_LIMIT": MYSQL
+                "HOST": MYSQL.HOST,
+                "PORT": MYSQL.PORT,
+                "USER": MYSQL.USER,
+                "PASSWORD": MYSQL.PASSWORD,
+                "DATABASE": MYSQL.DATABASE,
+                "CONNECTION_LIMIT": MYSQL.CONNECTION_LIMIT
             },
             "SECURITY": {
                 "KEY": SECURITY
