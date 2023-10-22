@@ -25,6 +25,7 @@
     "sqlstring": "^2.3.3",
     "ts-node": "^10.9.1",
     "typeorm": "^0.3.17",
+    "typeorm-encrypted": "^0.8.0",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"
   },
