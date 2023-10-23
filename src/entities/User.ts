@@ -1,9 +1,7 @@
-// src/entities/User.ts
 
-import crypto from 'crypto-js';
-import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, AfterLoad} from 'typeorm';
+
 import {userType, genderType} from "../repositories/UserEntity";
-import Config, {RUN_MODE} from "../../config";
 
 
 @Entity()
@@ -18,13 +16,24 @@ export class User {
     })
     type: string;
 
-    @Column()
+    @Column({
+        type: "varchar",
+        nullable: false,
+    })
     email: string;
 
-    @Column({ name: 'phone_number', select: false }) // 민감한 정보는 선택적으로 선택하지 않도록 설정
+    @Column({
+            type: "varchar",
+            name: 'phone_number',
+            nullable: false
+        })
     phoneNumber: string;
 
-    @Column()
+
+    @Column({
+        type: "varchar",
+        nullable: false
+    })
     name: string;
 
     @Column()
@@ -35,14 +44,13 @@ export class User {
         enum: genderType,
         default: null
     })
-    gender: genderType;
+    gender: string;
 
     @Column({ nullable: true })
     address: string;
 
     @Column({ nullable: true })
     address_detail: string;
-
 
 }
 
