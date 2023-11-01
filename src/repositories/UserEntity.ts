@@ -139,8 +139,28 @@ export const userSchema = {
     required: ["userId"]
 };
 
+
 export interface userInterface {
     userId: string
 };
+
+
+export const userInfoSchema = {
+    type: 'object',
+    properties: {
+        userId: userIdSchema,
+        phoneNumber: phoneNumberSchema,
+        email: emailSchema,
+    },
+    required: ["userId"]
+};
+
+
+export interface userInfoInterface {
+    userId: string,
+    phoneNumber: string,
+    email: string
+};
+
 
 

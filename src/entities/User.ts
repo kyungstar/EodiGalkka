@@ -66,6 +66,9 @@ export class UserLogin {
     @Column()
     password: string;
 
+    @Column()
+    issue_temp: number;
+
     @CreateDateColumn()
     reg_date: Date;
 
