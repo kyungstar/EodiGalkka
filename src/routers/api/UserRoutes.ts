@@ -13,7 +13,6 @@ router.post("/join", UserController.userJoin);
 // 고객 프로필
 router.post("/profile", [JwtCheck], UserController.userProfile);
 
-
 // 비밀번호 일치 여부 확인
 router.post("/profile", [JwtCheck], UserController.checkPwd);
 
@@ -29,8 +28,6 @@ router.post("/email/check", [JwtCheck], UserController.userProfile);
 // 임시비밀번호 발급
 router.post("/profile", [JwtCheck], UserController.issueTempPwd);
 
-
-// todo 임시비밀번호일 경우, 비밀번호 바꾸라고 하기
 // 고객 로그인
 router.post("/login", UserController.userLogin);
 
