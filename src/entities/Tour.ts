@@ -1,243 +1,183 @@
 
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    OneToMany, CreateDateColumn, JoinColumn
-} from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from 'typeorm';
 
-
+// todo  world, city, country, travel, continents 재정리 필요
 @Entity()
-export class world {
+export class World {
     @PrimaryGeneratedColumn('uuid')
-    world_seq: number;
+    world_seq: number; // 변경된 user_id 데이터 타입
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
     world_name: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
     world_contents: string;
 
     @Column({
-        type: "integer",
+        type: "int",
         nullable: false,
+        default: 0 // 기본값 0 설정
     })
     order_num: number;
 
+}
+
+
+@Entity()
+export class Continents {
+    @PrimaryGeneratedColumn('uuid')
+    continents_seq: number; // 변경된 user_id 데이터 타입
+
     @Column({
-        type: "integer",
+        type: "varchar",
         nullable: false
-    })
-    today_cnt: number;
-
-    @OneToMany(() => continents, continents => continents.world_seq)
-    continents: continents[];
-
-    @OneToMany(() => worldDetail, worldDetail => worldDetail.world_seq)
-    worldDetails: worldDetail[];
-}
-
-@Entity()
-export class worldDetail {
-    @PrimaryGeneratedColumn('uuid')
-    detail_seq: number;
-
-    @ManyToOne(() => world, world => world.worldDetails, {
-        onDelete: 'CASCADE', // 이 부분을 추가하면, 연관된 worldDetail 행이 삭제될 때 해당 world 행도 삭제됩니다.
-    })
-    @JoinColumn({ name: 'world_seq' })
-    world_seq: world;
-
-    @Column({
-        type: "varchar",
-        nullable: false,
-    })
-    title: string;
-
-    @Column({
-        type: "varchar",
-        nullable: false,
-    })
-    contents: string;
-}
-
-@Entity()
-export class continents {
-    @PrimaryGeneratedColumn('uuid')
-    continents_seq: number;
-
-    @ManyToOne(() => world, world => world.continents)
-    world_seq: world;
-
-    @Column({
-        type: "varchar",
-        nullable: false,
     })
     continents_name: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
-    title: string;
+    continents_contents: string;
 
     @Column({
-        type: "varchar",
+        type: "int",
         nullable: false,
-    })
-    contents: string;
-
-    @Column({
-        type: "integer",
-        nullable: false,
+        default: 0 // 기본값 0 설정
     })
     order_num: number;
 
     @Column({
-        type: "integer",
+        type: "datetime", // DATETIME 형식 설정
         nullable: false
     })
-    today_cnt: number;
-
-    @OneToMany(() => country, country => country.continents_seq)
-    country: country[];
+    reg_date: Date; // Date 타입으로 수정
 
 }
 
 
 @Entity()
-export class country {
+export class Country {
     @PrimaryGeneratedColumn('uuid')
-    country_seq: number;
+    country_seq: number; // 변경된 user_id 데이터 타입
 
-    @ManyToOne(() => continents, continents => continents.continents_seq)
-    continents_seq: world;
+    @ManyToOne(() => Continents, Continents => Continents.continents_seq) // World 엔티티와의 관계 설정
+    @JoinColumn() // 외래키 관계 설정
+    continents_seq: Continents; // World 엔티티와 관련된 열
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
     country_name: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
+    })
+    world_contents: string;
+
+    @Column({
+        type: "varchar",
+        nullable: false
     })
     title: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
     contents: string;
 
     @Column({
-        type: "integer",
+        type: "int",
         nullable: false,
+        default: 0 // 기본값 0 설정
     })
     order_num: number;
 
     @Column({
-        type: "integer",
-        nullable: false
+        type: "int",
+        nullable: false,
+        default: 0 // 기본값 0 설정
     })
     today_cnt: number;
 
-    @CreateDateColumn()
-    reg_date: Date;
+    @Column({
+        type: "datetime", // DATETIME 형식 설정
+        nullable: false
+    })
+    reg_date: Date; // Date 타입으로 수정
 
-    @OneToMany(() => city, city => city.city_seq)
-    city: city[];
 }
 
+
+// todo
 @Entity()
-export class city {
+export class City {
+// # city_seq, country_seq, city_name, title, contents, order_num, today_cnt, reg_date, countrySeqCountrySeq
     @PrimaryGeneratedColumn('uuid')
-    city_seq: number;
+    city_seq: number; // 변경된 user_id 데이터 타입
 
-    @ManyToOne(() => country, country => country.country_seq)
-    country_seq: world;
+    @ManyToOne(() => Country, Country => Country.country_seq) // World 엔티티와의 관계 설정
+    @JoinColumn() // 외래키 관계 설정
+    country_seq: Continents; // World 엔티티와 관련된 열
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
-    city_name: string;
+    country_name: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
+    })
+    world_contents: string;
+
+    @Column({
+        type: "varchar",
+        nullable: false
     })
     title: string;
 
     @Column({
         type: "varchar",
-        nullable: false,
+        nullable: false
     })
     contents: string;
 
     @Column({
-        type: "integer",
+        type: "int",
         nullable: false,
+        default: 0 // 기본값 0 설정
     })
     order_num: number;
 
     @Column({
-        type: "integer",
-        nullable: false
+        type: "int",
+        nullable: false,
+        default: 0 // 기본값 0 설정
     })
     today_cnt: number;
 
-    @CreateDateColumn()
-    reg_date: Date;
+    @Column({
+        type: "datetime", // DATETIME 형식 설정
+        nullable: false
+    })
+    reg_date: Date; // Date 타입으로 수정
 
 }
-
-
 
 @Entity()
 export class travel {
-    @PrimaryGeneratedColumn('uuid')
-    travel_seq: number;
 
-    @Column({
-        type: "varchar",
-        nullable: false,
-    })
-    title: string;
-
-    @Column({
-        type: "varchar",
-        nullable: false,
-    })
-    contents: string;
-
-    @Column({
-        type: "integer",
-        nullable: false,
-    })
-    order_num: number;
-
-    @Column({
-        type: "integer",
-        nullable: false
-    })
-    today_view_cnt: number;
-
-    @Column({
-        type: "integer",
-        nullable: false
-    })
-    total_view_cnt: number;
-
-    @CreateDateColumn()
-    reg_date: Date;
 
 }
+
