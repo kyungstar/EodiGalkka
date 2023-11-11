@@ -4,7 +4,7 @@ import Logger from "../../modules/middlewares/Logger";
 
 import {MyAuth} from "../../modules/middlewares/SecurityAuth";
 import {} from "../../../src/repositories/TourEntity";
-import {world, city, country, travel, continents} from '../../entities/Tour';
+import {World, Country, City, Continents, travel} from '../../entities/Tour';
 import {AppDataSource} from "../../modules/middlewares/DBConfig";
 import crypto from "crypto";
 import {decryptColumnList, encryptData, decryptData} from "../../../config/Security";
@@ -16,7 +16,7 @@ export default class UserService {
         try {
 
 
-            const WorldHelper = AppDataSource.getRepository(world);
+            const WorldHelper = AppDataSource.getRepository(World);
 
             const worldList = await WorldHelper.find({order: {order_num: 'ASC'}});
 
