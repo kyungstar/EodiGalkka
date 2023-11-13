@@ -1,14 +1,12 @@
-import DBHelper from "../../modules/db/DBHelpers";
 import Logger from "../../modules/middlewares/Logger";
 
-
-import {MyAuth} from "../../modules/middlewares/SecurityAuth";
-import {} from "../../../src/repositories/TourEntity";
-import {World, Country, City, Continents, travel} from '../../entities/Tour';
+import {World, Country, City, Continents, Travel} from '../../entities/Tour';
 import {AppDataSource} from "../../modules/middlewares/DBConfig";
-import crypto from "crypto";
-import {decryptColumnList, encryptData, decryptData} from "../../../config/Security";
-import {User} from "../../entities/User";
+import {userJoinInterface} from "../../repositories/UserEntity";
+import {cityInterface, continentsInterface, countryInterface} from "../../repositories/TourEntity";
+
+
+
 
 export default class UserService {
 
@@ -24,7 +22,7 @@ export default class UserService {
                 return [true, "세계 목록", {worldList: worldList}];
 
 
-            return [false, "세계 목록 조회 실패", null]
+            return [false, "세계 목록 조회 실패", null];
 
         } catch (err) {
             Logger.error("getEarthList " + err);
@@ -32,72 +30,106 @@ export default class UserService {
         }
     }
 
-    public static async getEarthDetail() {
+
+    public static async getContinentsList(continents: continentsInterface) {
         try {
 
-            return true;
+            const ContinentsHelper = AppDataSource.getRepository(Continents);
 
+            const continentsList = await ContinentsHelper.find({
+                where: { world: { world_seq: continents.worldSeq }},
+                order: { order_num: 'ASC' },
+            });
 
+            if (continentsList)
+                return [true, "대륙 목록", {continentsList: continentsList}];
+
+            return [false, "목록 조회 실패", null]
 
         } catch (err) {
-            Logger.error("getUserPhone " + err);
-            return null;
+            Logger.error("getEarthList " + err);
+            return [false, "목록 조회 실패", err]
         }
     }
 
 
-    public static async getWorldList() {
+    public static async getCountryList(country: countryInterface) {
         try {
 
-            return true;
+            const CountryHelper = AppDataSource.getRepository(Country);
 
+            const countryList = await CountryHelper.find({
+                where: { continents: { continents_seq: country.continentsSeq}},
+                order: { order_num: 'ASC' }
+            });
 
+            if (countryList)
+                return [true, "도시 목록", {countryList: countryList}];
+
+            return [false, "도시 상세", null];
 
         } catch (err) {
-            Logger.error("getUserPhone " + err);
-            return null;
+            Logger.error("getCountryList " + err);
+            return [false, "목록 조회 실패", err]
         }
     }
 
 
-    public static async getWorldDetail() {
+    public static async getCityList(city: cityInterface) {
         try {
 
-            return true;
+            const CityHelper = AppDataSource.getRepository(City);
 
+            const cityList = await CityHelper.find({
+                where: { country: { country_seq: city.countrySeq}},
+                order: { order_num: 'ASC' }
+            });
 
+            if (cityList)
+                return [true, "도시 목록", {cityList: cityList}];
+
+            return [false, "도시 상세", null];
 
         } catch (err) {
-            Logger.error("getUserPhone " + err);
-            return null;
+            Logger.error("getCountryList " + err);
+            return [false, "목록 조회 실패", err]
         }
     }
 
 
-    public static async getCountryList() {
+    public static async getTravelList() {
         try {
 
-            return true;
+            const TravelHelper = AppDataSource.getRepository(Travel);
 
+            const traveList = await TravelHelper.find({order: {order_num: 'ASC'}});
 
+            if (traveList)
+                return [true, "여행 목록", {traveList: traveList}];
+
+            return [false, "여형 상세", null];
 
         } catch (err) {
-            Logger.error("getUserPhone " + err);
-            return null;
+            Logger.error("getTravelList " + err);
+            return [false, "목록 조회 실패", err]
         }
     }
 
-
-    public static async getCountryDetail() {
+    public static async getTravelDetail(travelSeq: number) {
         try {
 
-            return true;
+            const TravelHelper = AppDataSource.getRepository(Travel);
 
+            const travelData = await TravelHelper.findOneBy({travel_seq: travelSeq});
 
+            if (travelData)
+                return [true, "여행 상세", {travelData: travelData}];
+
+            return [false, "여행 상세 조회 실패", null];
 
         } catch (err) {
-            Logger.error("getUserPhone " + err);
-            return null;
+            Logger.error("getTravelDetail " + err);
+            return [false, "목록 조회 실패", err]
         }
     }
 
