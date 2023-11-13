@@ -1,19 +1,25 @@
 
-// 유저타입명시
-import crypto from "crypto-js";
-import Config, {RUN_MODE} from "../../config";
 
+export enum orderType {
+    ASC = 'ASC',
+    DESC = 'DESC',
+}
 
-// 지구본
 const numberSchema = {
     type: 'number'
 };
 
-// 대륙 목록
+const stringSchema = {
+    type: 'string'
+};
+
+const orderSchema = {
+    type: 'string',
+    enum: Object.values(orderType)
+}
 
 
 
-// 로그인
 export const continentsSchema = {
     type: 'object',
     properties: {
@@ -48,4 +54,20 @@ export const citySchema = {
 
 export interface cityInterface {
     countrySeq: number
+};
+
+export const crawlerSchema = {
+    type: 'object',
+    properties: {
+        targetKeyword: stringSchema,
+        sort: orderSchema,
+        page: numberSchema,
+    },
+    required: ["targetKeyword", "sort", "page"],
+};
+
+export interface crawlerInterface {
+    targetKeyword: string,
+    sort: string,
+    page: number
 };
