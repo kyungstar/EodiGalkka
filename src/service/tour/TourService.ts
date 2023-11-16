@@ -97,44 +97,6 @@ export default class UserService {
     }
 
 
-    public static async getTravelList() {
-        try {
-
-            const TravelHelper = AppDataSource.getRepository(Travel);
-
-            const traveList = await TravelHelper.find({order: {order_num: 'ASC'}});
-
-            if (traveList)
-                return [true, "여행 목록", {traveList: traveList}];
-
-            return [false, "여형 상세", null];
-
-        } catch (err) {
-            Logger.error("getTravelList " + err);
-            return [false, "목록 조회 실패", err]
-        }
-    }
-
-    public static async getTravelDetail(travelSeq: number) {
-        try {
-
-            const TravelHelper = AppDataSource.getRepository(Travel);
-
-            const travelData = await TravelHelper.findOneBy({travel_seq: travelSeq});
-
-            if (travelData)
-                return [true, "여행 상세", {travelData: travelData}];
-
-            return [false, "여행 상세 조회 실패", null];
-
-        } catch (err) {
-            Logger.error("getTravelDetail " + err);
-            return [false, "목록 조회 실패", err]
-        }
-    }
-
-
-
 
 }
 

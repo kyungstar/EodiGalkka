@@ -22,7 +22,7 @@ router.post("/country/list", [JwtCheck], TourController.countryList);
 router.post("/city/list", [JwtCheck], TourController.cityList);
 
 // 패키지 목록
-router.post("/travel/list", [JwtCheck], TourController.countryList);
+router.post("/crawler", [JwtCheck], TourController.crawlerList);
 
 
 export default router;

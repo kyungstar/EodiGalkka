@@ -8,11 +8,12 @@ import {
     continentsInterface,
     continentsSchema,
     countryInterface,
-    countrySchema
+    countrySchema, crawlerInterface, crawlerSchema
 } from "../../../repositories/TourEntity";
 import ResHandler from "../ResHandler";
 import TourService from "../../../service/tour/TourService";
 import {userJoinInterface, userJoinSchema} from "../../../repositories/UserEntity";
+import CrawlerService from "../../../service/tour/CrawlerService";
 
 
 class TourController extends ResHandler {
@@ -125,11 +126,28 @@ class TourController extends ResHandler {
 
     }
 
-    public travelList = async (req: Request, res: Response) => {
+    public crawlerList = async (req: Request, res: Response) => {
 
         try {
 
-            // await TourService.getCountryDetail();
+            const data = DataValiator.checkSchema(
+                DataValiator.initRequest(req, res, crawlerSchema),
+            ) as  crawlerInterface;
+
+            const checkResult = DataValiator.checkResult(data);
+
+            if (!checkResult) {
+                return this.validErr(res);
+            }
+
+            const [getCrawlerResult, crawlerCode, crawlerList] = await CrawlerService.getCrawlerList(data.targetKeyword, data.sort, data.page)
+
+            if (!getCrawlerResult) {
+                this.false(crawlerCode, res);
+                return;
+            }
+
+            this.true(crawlerCode, res, crawlerList);
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
@@ -137,18 +155,6 @@ class TourController extends ResHandler {
 
     }
 
-
-    public travelDetail = async (req: Request, res: Response) => {
-
-        try {
-
-            // await TourService.getCountryDetail();
-
-        } catch (err) { // 유효성 검사 에러
-            this.err(err, res);
-        }
-
-    }
 
 
 }
