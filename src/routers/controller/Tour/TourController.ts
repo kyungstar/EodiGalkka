@@ -12,7 +12,6 @@ import {
 } from "../../../repositories/TourEntity";
 import ResHandler from "../ResHandler";
 import TourService from "../../../service/tour/TourService";
-import {userJoinInterface, userJoinSchema} from "../../../repositories/UserEntity";
 import CrawlerService from "../../../service/tour/CrawlerService";
 
 
