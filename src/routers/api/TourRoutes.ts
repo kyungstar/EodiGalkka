@@ -1,7 +1,7 @@
 import {json, Router} from "express";
 
 import TourController from '../controller/Tour/TourController';
-import {JwtCheck} from "../../modules/middlewares/SecurityAuth"
+import {JwtCheck} from "../../modules/SecurityAuth"
 
 
 const router = Router();

@@ -1,7 +1,7 @@
-import Logger from "../../modules/middlewares/Logger";
+import Logger from "../../modules/Logger";
 
 import {World, Country, City, Continents, Travel} from '../../entities/Tour';
-import {AppDataSource} from "../../modules/middlewares/DBConfig";
+import {AppDataSource} from "../../modules/DBConfig";
 import {userJoinInterface} from "../../repositories/UserEntity";
 import {cityInterface, continentsInterface, countryInterface} from "../../repositories/TourEntity";
 

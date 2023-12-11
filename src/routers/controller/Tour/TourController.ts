@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 
 
-import Logger from "../../../modules/middlewares/Logger";
+import Logger from "../../../modules/Logger";
 import DataValiator from "../../../service/DataValiator";
 import {
     cityInterface, citySchema,
