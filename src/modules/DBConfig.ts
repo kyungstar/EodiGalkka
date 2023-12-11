@@ -2,7 +2,7 @@ import "reflect-metadata"
 import { DataSource } from "typeorm"
 import Logger from "./Logger";
 import * as path from "path";
-import Config, {RUN_MODE} from "../../../config";
+import Config, {RUN_MODE} from "../../config";
 
 export const AppDataSource = new DataSource({
     type: "mysql",

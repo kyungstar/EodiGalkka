@@ -5,8 +5,8 @@ import crypto from "crypto";
 import CryptoJS from "crypto-js";
 import moment from "moment";
 
-import Config, {RUN_MODE} from "../../../config";
-import Logger from "../../modules/middlewares/Logger";
+import Config, {RUN_MODE} from "../../config";
+import Logger from "./Logger";
 
 
 const JWT_SECRET = Config.JWT[RUN_MODE].SECRET_KEY;

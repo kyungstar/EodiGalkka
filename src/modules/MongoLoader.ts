@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 
 // Config.json 파일 가져오기
-import Config, {RUN_MODE} from "../../../config";
-import {MONGO, MongoDatabase} from "../../../config/Security";
+import Config, {RUN_MODE} from "../../config";
+import {MONGO, MongoDatabase} from "../../config/Security";
 import Logger from "./Logger";
 
 const app = express();
