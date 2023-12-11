@@ -3,7 +3,7 @@ import {AddressInfo} from "net";
 import formData from "express-form-data";
 
 
-import Logger from "./modules/middlewares/Logger";
+import Logger from "./modules/Logger";
 import router from "./routers/api";
 
 // Config.json 파일 가져오기

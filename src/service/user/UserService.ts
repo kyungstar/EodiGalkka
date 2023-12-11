@@ -1,11 +1,12 @@
-import Logger from "../../modules/middlewares/Logger";
+import Logger from "../../modules/Logger";
 
-import {MyAuth} from "../../modules/middlewares/SecurityAuth";
+import {MyAuth} from "../../modules/SecurityAuth";
 import {userInterface, userJoinInterface, userLoginInterface} from "../../../src/repositories/UserEntity";
 import {User, UserLogin} from '../../entities/User';
-import {AppDataSource} from "../../modules/middlewares/DBConfig";
+import {AppDataSource} from "../../modules/DBConfig";
 import crypto from "crypto";
 import {decryptColumnList, encryptData, decryptData} from "../../../config/Security";
+import logger from "../../modules/Logger";
 
 export default class UserService {
 

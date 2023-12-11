@@ -1,7 +1,7 @@
 import {json, Router} from "express";
 
 import UserController from '../controller/User/UserController';
-import {JwtCheck} from "../../modules/middlewares/SecurityAuth"
+import {JwtCheck} from "../../modules/SecurityAuth"
 
 
 const router = Router();
