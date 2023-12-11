@@ -11,7 +11,7 @@ import {
     imgDownSchema
 } from "../../../repositories/FileEntity";
 import FileService from "../../../service/file/FileService";
-import Logger from "../../../modules/middlewares/Logger";
+import Logger from "../../../modules/Logger";
 
 
 class FileController extends ResHandler {

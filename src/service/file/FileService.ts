@@ -3,7 +3,7 @@ import multer from "multer";
 import dayjs from "dayjs";
 import {v4 as uuid} from "uuid";
 
-import Logger from "../../modules/middlewares/Logger";
+import Logger from "../../modules/Logger";
 import Config from "../../../config";
 
 import sharp from "sharp";

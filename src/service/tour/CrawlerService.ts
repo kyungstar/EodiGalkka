@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import cheerio from 'cheerio';
-import Logger from "../../modules/middlewares/Logger";
+import Logger from "../../modules/Logger";
 
 export default class CrawlerService {
 

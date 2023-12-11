@@ -1,7 +1,7 @@
 import express, {Response} from "express";
 
-import Logger from "../../modules/middlewares/Logger";
-import {MyAuth} from "../../modules/middlewares/SecurityAuth";
+import Logger from "../../modules/Logger";
+import {MyAuth} from "../../modules/SecurityAuth";
 
 
 export default class ResHandler {

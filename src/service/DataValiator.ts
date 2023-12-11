@@ -1,6 +1,6 @@
 import Ajv, {Schema} from 'ajv';
 import {Request, Response} from 'express';
-import Logger from '../modules/middlewares/Logger';
+import Logger from '../modules/Logger';
 
 const ajv = new Ajv();
 

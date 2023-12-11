@@ -1,7 +1,7 @@
 import {Router} from "express";
 
 import FileController from '../controller/File/FileController';
-import {JwtCheck} from "../../modules/middlewares/SecurityAuth"
+import {JwtCheck} from "../../modules/SecurityAuth"
 
 
 const router = Router();
