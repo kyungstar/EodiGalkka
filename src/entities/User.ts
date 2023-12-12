@@ -1,8 +1,7 @@
 
-import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, CreateDateColumn, AfterLoad} from 'typeorm';
-
+import {Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
 import {userType, genderType} from "../repositories/UserEntity";
-import mongoose from "mongoose";
+
 
 @Entity()
 export class User {
@@ -66,7 +65,11 @@ export class UserLogin {
     @Column()
     password: string;
 
-    @Column()
+    @Column({
+        type: 'integer',
+        default: 0,
+        nullable: true
+    })
     issue_temp: number;
 
     @CreateDateColumn()
@@ -74,22 +77,6 @@ export class UserLogin {
 
 }
 
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,               // 문자열 타입
-        required: [true, "User must type name"],   // 필수 속성, 빈 값이거나 없으면 에러
-        unique: true               // 중복 방지, 동일한 이름의 사용자가 없도록 함
-    },
-    // 사용자 토큰
-    token: {
-        type: String               // 문자열 타입
-    },
-    // 온라인 상태 여부
-    online: {
-        type: Boolean,             // 불리언 타입
-        default: false             // 기본값은 false, 사용자의 기본 온라인 상태는 오프라인
-    }
-})
 
-// ChatUser 모델 생성 및 내보내기
-module.exports = mongoose.model("ChatUser", userSchema);
+
+
