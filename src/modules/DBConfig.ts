@@ -13,10 +13,11 @@ export const AppDataSource = new DataSource({
     database: "nodejs",
     synchronize: true,
     logging: true,
-    entities: [path.join(__dirname, "../../entities/*.ts")],
+    entities: ["./src/entities/*.ts"],
     subscribers: [],
-    migrations: [],
+    migrations: []
 })
+
 
 AppDataSource.initialize()
     .then(() => {Logger.info("AppDataSource is Loaded")})
