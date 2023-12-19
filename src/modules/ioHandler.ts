@@ -10,8 +10,7 @@ export default function ioHandler(io: Server) {
             Logger.info(userName);
             // 유저정보를 저장
             try {
-                const user = await ChatController.saveUser(userName, socket.id);
-                cb({result: true, data:user});
+                cb({result: true});
             } catch (err) {
                 Logger.info(err.stack);
                 cb({result: false});
@@ -23,14 +22,9 @@ export default function ioHandler(io: Server) {
         socket.on("sendMessage", async (message, cb)=> {
 
             try {
-                // 유저정보 찾기
-                const user = await ChatController.checkUser(socket.id);
 
-                if(!user) {
-                    cb({result: false, message: "User Not Exists"});
-                }
                 // 메시지 저장
-                const newMessage = await ChatController.saveChat(message, user);
+                const newMessage = await ChatController.saveChat(message, true);
                 io.emit("message", newMessage);
             } catch (err) {
                 Logger.info(err.stack);
