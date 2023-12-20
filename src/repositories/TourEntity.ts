@@ -1,29 +1,32 @@
 
-
 export enum orderType {
     ASC = 'ASC',
     DESC = 'DESC',
 }
 
-const numberSchema = {
-    type: 'number'
+
+const tourClientSchema = {
+    defaultStringSchema: {
+        type: 'string',
+    },
+    defaultNumberSchema: {
+        type: 'number',
+    },
+    orderSchema: {
+        type: 'string',
+        enum: Object.values(orderType)
+    },
+    userIdSchema: {
+        type: 'string',
+        minLength: 8,
+        maxLength: 50
+    }
 };
-
-const stringSchema = {
-    type: 'string'
-};
-
-const orderSchema = {
-    type: 'string',
-    enum: Object.values(orderType)
-}
-
-
 
 export const continentsSchema = {
     type: 'object',
     properties: {
-        worldSeq: numberSchema,
+        worldSeq: tourClientSchema.defaultNumberSchema,
     },
     required: ["worldSeq"],
 };
@@ -35,19 +38,16 @@ export interface continentsInterface {
 export const countrySchema = {
     type: 'object',
     properties: {
-        continentsSeq: numberSchema,
+        continentsSeq: tourClientSchema.defaultNumberSchema,
     },
     required: ["continentsSeq"],
 };
 
-export interface countryInterface {
-    continentsSeq: number
-};
 
 export const citySchema = {
     type: 'object',
     properties: {
-        countrySeq: numberSchema,
+        countrySeq: tourClientSchema.defaultNumberSchema,
     },
     required: ["countrySeq"],
 };
@@ -59,11 +59,16 @@ export interface cityInterface {
 export const crawlerSchema = {
     type: 'object',
     properties: {
-        targetKeyword: stringSchema,
-        sort: orderSchema,
-        page: numberSchema,
+        targetKeyword: tourClientSchema.defaultStringSchema,
+        sort: tourClientSchema.orderSchema,
+        page: tourClientSchema.defaultNumberSchema
     },
     required: ["targetKeyword", "sort", "page"],
+};
+
+
+export interface countryInterface {
+    continentsSeq: number
 };
 
 export interface crawlerInterface {
