@@ -35,12 +35,14 @@ class UserController extends ResHandler {
                 return this.validErr(res);
             }
 
-            const [userJoinResult, userJoinCode] = await UserService.insertUserSingUp(data);
+            const [userJoinResult, userJoinCode] = await UserService.userSingUp(data);
 
-            if (userJoinResult)
-                this.true(userJoinCode, res);
-            else
+            if (!userJoinResult) {
                 this.false(userJoinCode, res);
+                return;
+            }
+
+            this.true(userJoinCode, res);
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
@@ -64,12 +66,15 @@ class UserController extends ResHandler {
                 return this.validErr(res);
             }
 
-            const [userLoginResult, userLoginCode, myData] = await UserService.checkUserSingIn(data);
+            const [userLoginResult, userLoginCode, myData] = await UserService.userLogin(data);
 
-            if (userLoginResult)
-                this.true(userLoginCode, res, myData);
-            else
+            if (!userLoginResult) {
                 this.false(userLoginCode, res);
+                return;
+            }
+
+            this.true(userLoginCode, res, myData);
+
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
@@ -94,10 +99,12 @@ class UserController extends ResHandler {
 
             const [profileResult, profileCode, myProfile] = await UserService.getUserProfile(data);
 
-            if (profileResult)
-                this.true(profileCode, res, myProfile);
-            else
+            if (!profileResult) {
                 this.false(profileCode, res);
+                return;
+            }
+
+            this.true(profileCode, res, myProfile);
 
 
         } catch (err) { // 유효성 검사 에러
@@ -123,10 +130,12 @@ class UserController extends ResHandler {
 
             const [pwdCheckResult, pwdCode] = await UserService.checkCorrectPwd(data);
 
-            if (pwdCheckResult)
-                this.true(pwdCode, res);
-            else
+            if (!pwdCheckResult) {
                 this.false(pwdCode, res);
+                return;
+            }
+
+            this.true(pwdCode, res);
 
 
         } catch (err) { // 유효성 검사 에러
@@ -153,11 +162,11 @@ class UserController extends ResHandler {
             const phoneData = await UserService.getUserPhone(data.phoneNumber);
 
             if (!phoneData) {
-                this.false("이미 존재하는 전화번호입니다.", res);
+                this.true("사용가능한 전화번호입니다.", res);
                 return;
             }
 
-            this.true("사용가능한 전화번호입니다.", res);
+            this.false("이미 존재하는 전화번호입니다.", res);
 
 
         } catch (err) { // 유효성 검사 에러
@@ -198,7 +207,7 @@ class UserController extends ResHandler {
     }
 
 
-    public modUserInfo = async (req: Request, res: Response) => {
+    public updateUserInfo = async (req: Request, res: Response) => {
 
         try {
 

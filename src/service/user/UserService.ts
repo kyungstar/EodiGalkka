@@ -2,22 +2,20 @@ import Logger from "../../modules/Logger";
 
 import {MyAuth} from "../../modules/SecurityAuth";
 import {userInterface, userJoinInterface, userLoginInterface} from "../../../src/repositories/UserEntity";
-import {User, UserLogin} from '../../entities/User';
-import {AppDataSource} from "../../modules/DBConfig";
-import crypto from "crypto";
-import {decryptColumnList, encryptData, decryptData} from "../../../config/Security";
-import logger from "../../modules/Logger";
+import DBHelper from "../../modules/DBHelper";
+
 
 export default class UserService {
 
 
-    public static async getUserPhone(phoneNumber: string): Promise<User | null> {
+    // @ts-ignore
+    public static async getUserPhone(phoneNumber: string) {
         try {
 
+            const phoneData = await DBHelper.findOne("user",{phone_number: phoneNumber});
 
-            const UserHelper = AppDataSource.getRepository(User);
-
-            const phoneData = await UserHelper.findOneBy({phoneNumber: encryptData(phoneNumber)});
+            if(!phoneData)
+                return null;
 
             return phoneData;
 
@@ -31,9 +29,10 @@ export default class UserService {
 
         try {
 
-            const UserHelper = AppDataSource.getRepository(User);
+            const emailData = await DBHelper.findOne("user",{email: email});
 
-            const emailData = await UserHelper.findOneBy({email: encryptData(email)});
+            if(!emailData)
+                return null;
 
             return emailData;
 
@@ -48,9 +47,12 @@ export default class UserService {
 
         try {
 
-            const UserHelper = AppDataSource.getRepository(User);
+            const userData = await DBHelper.findOne("user",
+                {user_id: userId},
+                ["user_id", "email", "phone_number", "name", "nickname", "gender", "address", "address_detail"]);
 
-            const userData = await UserHelper.findOneBy({user_id: userId});
+            if(!userData)
+                return null;
 
             return userData;
 
@@ -64,20 +66,22 @@ export default class UserService {
 
         try {
 
-            const UserHelper = AppDataSource.getRepository(UserLogin);
+            const loginData = await DBHelper.findOne("user_login", whereObj);
 
-            const loginData = await UserHelper.findOneBy(whereObj);
+            if(!loginData)
+                return null;
 
             return loginData;
 
+
         } catch (err) {
-            Logger.error("getLoginData" + err);
+            Logger.error("getLoginData : " + err);
             return false;
         }
     }
 
 
-    public static async insertUserSingUp(userJoin: userJoinInterface): Promise<[boolean, string, any?]> {
+    public static async userSingUp(userJoin: userJoinInterface): Promise<[boolean, string, any?]> {
 
         try {
 
@@ -86,12 +90,10 @@ export default class UserService {
             if (phoneCheck)
                 return [false, "이미 중복된 전화번호입니다.", phoneCheck];
 
-
             const emailData = await this.getUserEmail(userJoin.email);
 
             if (emailData)
                 return [false, "이미 중복된 이메일입니다.", emailData];
-
 
             const userId = await MyAuth.generateUserId();
 
@@ -105,47 +107,30 @@ export default class UserService {
             if (!passWd)
                 return [false, "회원가입에 실패하였습니다."];
 
-            const UserHelper = AppDataSource.createQueryRunner();
-            await UserHelper.connect();
-            await UserHelper.startTransaction();
 
+            const userInsertResult = await DBHelper.tranQuery([
+                DBHelper.InsertQuery("user", {
+                    user_id: userId,
+                    type: userJoin.userType,
+                    nickname: userJoin.nickName,
+                    gender: userJoin.gender,
+                    email: userJoin.email,
+                    phone_number: userJoin.phoneNumber,
+                    address: userJoin.address,
+                    address_detail: userJoin.addressDetail,
+                    name: userJoin.name
+                }),
+                DBHelper.InsertQuery("user_login",{
+                    user_id: userId,
+                    login_id: userJoin.loginId,
+                    password: passWd
+                })
+            ])
 
-            try {
-
-                // User 엔티티 생성
-                const user: User = new User();
-                const userLogin: UserLogin = new UserLogin();
-
-                user.user_id = userId;
-                user.type = userJoin.userType;
-                user.nickname = userJoin.nickName;
-                user.gender = userJoin.gender;
-                user.address = userJoin.address;
-                user.address_detail = userJoin.addressDetail;
-
-                user.phoneNumber = encryptData(userJoin.phoneNumber);
-                user.email = encryptData(userJoin.email);
-                user.name = encryptData(userJoin.name);
-
-                userLogin.user_id = userId;
-                userLogin.login_id = userJoin.loginId;
-                userLogin.password = passWd;
-
-                // User 엔티티와 UserLogin 엔티티를 저장합니다.
-                await UserHelper.manager.insert(User, user);
-                await UserHelper.manager.insert(UserLogin, userLogin);
-
-                // User 엔티티 저장
-                await UserHelper.commitTransaction();
-
-                return [true, "회원가입에 성공하였습니다."];
-            } catch (err) {
-                await UserHelper.rollbackTransaction();
-                Logger.error(err.message);
+            if(!userInsertResult)
                 return [false, "회원가입에 실패하였습니다."];
-            } finally {
-                await UserHelper.release();
-            }
+
+            return [true, "회원가입에 성공하였습니다."];
 
 
         } catch (err) {
@@ -155,12 +140,11 @@ export default class UserService {
     }
 
 
-    public static async checkUserSingIn(userLogin: userLoginInterface): Promise<[boolean, string, any?]> {
+    public static async userLogin(userLogin: userLoginInterface): Promise<[boolean, string, any?]> {
 
         try {
 
-
-            const loginData = await this.getLoginData({login_id: userLogin.loginId});
+            const loginData: any = await this.getLoginData({login_id: userLogin.loginId});
 
             if (!loginData) {
                 return [false, "아이디가 일치하지 않습니다."];
@@ -176,7 +160,6 @@ export default class UserService {
 
             if (!pwdCheck)
                 return [false, "로그인에 실패했습니다."];
-
 
             const myToken = MyAuth.createToken({userId: loginData.user_id});
 
@@ -196,27 +179,17 @@ export default class UserService {
 
         try {
 
-            const loginData = await this.getLoginData({user_id: user.userId});
+            const userData = await this.getUserData(user.userId);
 
-            if (!loginData) {
-                return [false, "회원정보가 일치하지 않습니다."];
+            if (!userData) {
+                return [false, "회원정보가 일치하지 않습니다.", null];
             }
 
-            const userData: any = await this.getUserData(loginData.user_id);
-
-            if (!userData)
-                return [false, "회원정보가 일치하지 않습니다."];
-            for (const userProperty in userData) {
-                if (decryptColumnList.includes(userProperty))
-                    userData[userProperty] = decryptData(userData[userProperty]);
-
-            }
-
-            return [true, "회원정보 일치", {userProfile: userData}];
+            return [true, "회원정보가 일치", {userData: userData}];
 
         } catch (err) {
             Logger.error("userJoin" + err);
-            return [false, "회원가입에 실패하였습니다."];
+            return [false, "회원정보가 일치하지 않습니다.", null];
         }
     }
 
@@ -224,7 +197,7 @@ export default class UserService {
 
         try {
 
-            const loginData = await this.getLoginData({login_id: userLoginData.loginId});
+            const loginData: any = await this.getLoginData({login_id: userLoginData.loginId});
 
             if (!loginData) {
                 return [false, "아이디가 일치하지 않습니다."];
@@ -260,48 +233,38 @@ export default class UserService {
             if (!userData)
                 return [false, "로그인에 실패했습니당."];
 
-            const UserHelper = AppDataSource.createQueryRunner();
-            await UserHelper.connect();
-            await UserHelper.startTransaction();
-
-
-            try {
-
-                // User 엔티티 생성
-                const user: User = new User();
-                const userLogin: UserLogin = new UserLogin();
-
-                user.nickname = userJoin.nickName;
-                user.gender = userJoin.gender;
-                user.address = userJoin.address;
-                user.address_detail = userJoin.addressDetail;
-
-                user.phoneNumber = encryptData(userJoin.phoneNumber);
-                user.email = encryptData(userJoin.email);
-                user.name = encryptData(userJoin.name);
-
-
-                // User 엔티티와 UserLogin 엔티티를 저장합니다.
-                await UserHelper.manager.update(User, {id: userData.user_id}, user); // userId에 실제 유저 ID를 제공해야 합니다.
-                await UserHelper.manager.update(UserLogin, {userId: userData.user_id}, userLogin); // userId에 실제 유저 ID를 제공해야 합니다.
-
-                // User 엔티티 저장
-                await UserHelper.commitTransaction();
-
-                return [true, "회원정보 수정에 성공하였습니다."];
-            } catch (err) {
-                await UserHelper.rollbackTransaction();
-                Logger.error(err.message);
-                return [false, "회원정보 수정에 실패하였습니다."];
-            } finally {
-                await UserHelper.release();
-            }
-
 
         } catch (err) {
             Logger.error("userJoin " + err.stack);
             return [false, "회원정보 수정에 실패하였습니다."];
         }
+
+            /*
+
+                            // User 엔티티 생성
+                            const user: User = new User();
+                            const userLogin: UserLogin = new UserLogin();
+
+                            user.nickname = userJoin.nickName;
+                            user.gender = userJoin.gender;
+                            user.address = userJoin.address;
+                            user.address_detail = userJoin.addressDetail;
+
+                            user.phoneNumber = encryptData(userJoin.phoneNumber);
+                            user.email = encryptData(userJoin.email);
+                            user.name = encryptData(userJoin.name);
+
+
+                            // User 엔티티와 UserLogin 엔티티를 저장합니다.
+                            await UserHelper.manager.update(User, {id: userData.user_id}, user); // userId에 실제 유저 ID를 제공해야 합니다.
+                            await UserHelper.manager.update(UserLogin, {userId: userData.user_id}, userLogin); // userId에 실제 유저 ID를 제공해야 합니다.
+
+                            // User 엔티티 저장
+                            await UserHelper.commitTransaction();
+            */
+
+            return [true, "회원정보 수정에 성공하였습니다."];
+
     }
 
     public static async issueTempPwd(userLogin: userLoginInterface): Promise<[boolean, string, any?]> {
@@ -316,6 +279,7 @@ export default class UserService {
             const tempPwd = await MyAuth.generateUserId();
 
             const targetTempPwd = tempPwd.slice(0, 7);
+/*
 
             const passWd = await MyAuth.getEncryptPwd(userData.user_id, targetTempPwd);
 
@@ -323,12 +287,14 @@ export default class UserService {
 
             const userPwdUpdate = await UserHelper.update({password: passWd, issue_temp: 1}, {user_id: userData.user_id})
 
+
             if (userPwdUpdate) {
                 return [true, "비밀번호 변경 성공"];
             } else {
                 return [false, "비밀번호 변경 실패"];
             }
-
+*/
+            return [false, "비밀번호 변경 실패"];
 
         } catch (err) {
             Logger.error("userJoin " + err.stack);
