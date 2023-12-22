@@ -7,6 +7,7 @@ import moment from "moment";
 
 import Config, {RUN_MODE} from "../../config";
 import Logger from "./Logger";
+import {JWT} from "../../config/Security";
 
 
 const JWT_SECRET = Config.JWT[RUN_MODE].SECRET_KEY;
@@ -45,14 +46,12 @@ export class MyAuth {
     public static getEncryptCode(code: string) {
 
         try {
-
-
             const TodayKey = moment().format("DDMMYYYY") + Config.HASH.KEY + moment().format("DDMMYYYY");
 
             const encryptedCodeMessage = CryptoJS.AES.encrypt(code, TodayKey).toString();
-            const decryptedCode = CryptoJS.AES.decrypt(encryptedCodeMessage, TodayKey);
 
-            // Logger.info(ciphertext);
+            // 클라이언트 검증 코드
+            // const decryptedCode = CryptoJS.AES.decrypt(encryptedCodeMessage, TodayKey);
 
             if (encryptedCodeMessage)
                 return encryptedCodeMessage;
@@ -84,8 +83,6 @@ export class MyAuth {
     public static async compareEncryptPwd(userId: string, pwd: string, inputPwd: string) {
 
         try {
-
-
             const targetPwd = await this.getEncryptPwd(userId, inputPwd);
 
             if (targetPwd === pwd)
@@ -103,8 +100,6 @@ export class MyAuth {
     public static async generateUserId() {
 
         try {
-
-
             // UUID 생성
             const uuid = uuidv4();
 
@@ -143,12 +138,12 @@ interface JwtModel {
 
 export function JwtCheck(req: Request, res: Response, next: NextFunction) {
 
-
-
     try {
 
-
         let token = req.headers.authorization;
+
+        if(!token)
+            throw new Error("Not Exist Headers")
 
         if (token && token.startsWith("Bearer ")) {
             token = token.slice(7); // "Bearer " 부분을 제거하고 나머지 문자열 반환
@@ -166,12 +161,12 @@ export function JwtCheck(req: Request, res: Response, next: NextFunction) {
             userId: jwtCheck.userId
         };
 
-
         req.body.userId = userInfo.userId;
 
         next();
 
-    } catch (error) {
+    } catch (err) {
+        Logger.debug(err.stack);
         res.status(401).json({success: false, message: "Unauthorized"});
         return;
     }
