@@ -80,7 +80,7 @@ export default class FileService {
 
 
 /*
-            const fileData: number = await DBHelper.insert("file_info", {
+            const fileData: number = await DBHelper_B.insert("file_info", {
                 file_path: dir + "/",
                 file_name: fileName,
                 file_size: movSize,
@@ -144,7 +144,7 @@ export default class FileService {
 
 /*
 
-            const fileData: number = await DBHelper.insert("file_info", {
+            const fileData: number = await DBHelper_B.insert("file_info", {
                 file_path: dir + "/",
                 file_name: fileName,
                 file_size: imgSize,
@@ -187,7 +187,7 @@ export default class FileService {
 
         try {
 
-          /*  const fileData = await DBHelper.findOne("file_info", {file_seq: imgData.fileSeq});
+          /*  const fileData = await DBHelper_B.findOne("file_info", {file_seq: imgData.fileSeq});
 
             if (!fileData)
                 return [false, "이미지 다운로드 실패"];

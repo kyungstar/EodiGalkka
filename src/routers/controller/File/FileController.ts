@@ -5,9 +5,8 @@ import DataValiator from "../../../service/DataValiator";
 import ResHandler from "../ResHandler";
 
 import {
-    imageUploadInterface,
     imgUploadSchema,
-    imageDownInterface,
+    imageInterface,
     imgDownSchema
 } from "../../../repositories/FileEntity";
 import FileService from "../../../service/file/FileService";
@@ -23,7 +22,7 @@ class FileController extends ResHandler {
             const data = DataValiator.checkSchema(
                 DataValiator.initRequest(req, res, imgUploadSchema),
                 DataValiator.checkString(['file', "fileDir", "fileType"])
-            ) as imageUploadInterface;
+            ) as imageInterface;
 
             const checkResult = DataValiator.checkResult(data);
 
@@ -53,7 +52,7 @@ class FileController extends ResHandler {
             const data = DataValiator.checkSchema(
                 DataValiator.initRequest(req, res, imgDownSchema),
                 DataValiator.checkNumber(['fileSeq'])
-            ) as imageDownInterface;
+            ) as imageInterface;
 
             const checkResult = DataValiator.checkResult(data);
 
@@ -82,7 +81,7 @@ class FileController extends ResHandler {
             const data = DataValiator.checkSchema(
                 DataValiator.initRequest(req, res, imgDownSchema),
                 DataValiator.checkString(['filePath'])
-            ) as imageDownInterface;
+            ) as imageInterface;
 
             const checkResult = DataValiator.checkResult(data);
 
@@ -112,7 +111,7 @@ class FileController extends ResHandler {
             const data = DataValiator.checkSchema(
                 DataValiator.initRequest(req, res, imgUploadSchema),
                 DataValiator.checkString(['file', "fileDir", "fileType"])
-            ) as imageUploadInterface;
+            ) as imageInterface;
 
             const checkResult = DataValiator.checkResult(data);
 

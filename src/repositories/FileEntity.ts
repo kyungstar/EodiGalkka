@@ -1,41 +1,37 @@
 
-
-const userIdSchema = {
-    type: 'string',
-    minLength: 8,
-    maxLength: 50
+const fileClientSchema = {
+    defaultStringSchema: {
+        type: 'string',
+    },
+    defaultNumberSchema: {
+        type: 'number',
+    },
+    fileSchema: {
+        type: 'object'
+    },
+    userIdSchema: {
+        type: 'string',
+        minLength: 8,
+        maxLength: 50
+    }
 };
 
-// 파일 Dir
-const fileDirSchema = {
-    type: 'string'
+export interface imageInterface {
+    file: string,
+    fileSeq?: number,
+    fileDir: string,
+    fileType?: string,
+    userId: string
 };
 
-const fileSchema = {
-    type: 'object'
-};
-
-
-const fileSeqSchema = {
-    type: 'number'
-};
-
-const filePathSchema = {
-    type: 'string'
-};
-
-const fileTypeSchema = {
-    type: 'string'
-};
-
-// 회원가입
+// 파일
 export const imgUploadSchema = {
     type: 'object',
     properties: {
-        file: fileSchema,
-        fileDir: fileDirSchema,
-        fileType: fileTypeSchema,
-        userId: userIdSchema
+        file: fileClientSchema.fileSchema,
+        fileDir: fileClientSchema.defaultStringSchema,
+        fileType: fileClientSchema.defaultStringSchema,
+        userId: fileClientSchema.userIdSchema
     },
     required: ["file", "fileDir", "userId"]
 };
@@ -43,23 +39,13 @@ export const imgUploadSchema = {
 export const imgDownSchema = {
     type: 'object',
     properties: {
-        fileSeq: fileSeqSchema,
-        filePath: filePathSchema,
-        userId: userIdSchema
+        fileSeq: fileClientSchema.defaultNumberSchema,
+        filePath: fileClientSchema.defaultStringSchema,
+        userId: fileClientSchema.userIdSchema
     },
     required: ["userId"]
 };
 
-export interface imageUploadInterface {
-    file: string,
-    fileDir: string,
-    fileType: string,
-    userId: string
-};
 
 
-export interface imageDownInterface {
-    fileSeq: number,
-    filePath: string,
-    userId: string
-};
+
