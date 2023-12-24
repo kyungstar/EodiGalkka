@@ -36,7 +36,6 @@ class DataValidator {
     }
 
 
-    // number 추가 작업 진행해야함
     public checkNumber(numberArr: string[]) {
         //let retObj: { [key: string]: any } = {};
         let retObj: Record<string, any> = {};
