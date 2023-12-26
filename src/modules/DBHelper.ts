@@ -112,39 +112,8 @@ class DBHelper {
         }
     }
 
-    selectConditions(selectList: string[]): string {
 
-        let selectQuery = ``;
 
-        for (const targetObj of selectList) {
-            if (EncryptColumns.includes(targetObj))
-                selectQuery += `CAST(AES_DECRYPT(UNHEX(${targetObj}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) AS CHAR) as ${targetObj} ,`
-            else
-                selectQuery += `${targetObj} ,`
-
-        }
-
-        if(selectQuery.slice(-1) === `,`)
-            selectQuery = selectQuery.slice(0, -1);
-
-        return selectQuery;
-
-    }
-
-    whereConditions(whereObj: Record<string, any>): string {
-
-        let whereQuery = ` WHERE 1 = 1 `;
-
-        for (const targetObj in whereObj) {
-            if (EncryptColumns.includes(targetObj))
-                whereQuery +=  `AND CAST(AES_DECRYPT(UNHEX(${targetObj}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) AS CHAR) = ${escape(whereObj[targetObj])}`
-            else
-                whereQuery += ` AND ${targetObj} = ${escape(whereObj[targetObj])}`
-        }
-
-        return whereQuery;
-
-    }
 
     findOne = async (tblName: string, whereObj?: any, selectList?: string[]): Promise<object> => {
         try {
@@ -152,7 +121,7 @@ class DBHelper {
             let selectQuery: string = `SELECT `;
 
             if(selectList)
-                selectQuery += this.selectConditions(selectList);
+                selectQuery += this.getSelectTargetQuery(selectList);
             else
                 selectQuery += ` * `
 
@@ -161,7 +130,7 @@ class DBHelper {
             let whereQuery: string = ``;
 
             if (whereObj)
-                whereQuery = this.whereConditions(whereObj);
+                whereQuery = this.getWhereQuery(whereObj);
 
             const targetQuery = selectQuery + whereQuery;
 
@@ -185,21 +154,7 @@ class DBHelper {
     find = async (tblName: string, whereObj?: any, selectList?: string[], addOption?: string): Promise<object> => {
         try {
 
-            let selectQuery: string = `SELECT `;
-
-            if(selectList)
-                selectQuery += this.selectConditions(selectList);
-            else
-                selectQuery += ` * `
-
-            selectQuery += ` FROM ${tblName}`;
-
-            let whereQuery: string = ``;
-
-            if (whereObj)
-                whereQuery = this.whereConditions(whereObj);
-
-            const targetQuery = selectQuery + whereQuery + addOption;
+            const targetQuery = this.getSelectQuery(tblName, whereObj, selectList, addOption);
 
             Logger.debug('findOne Query is : ' + targetQuery);
 
@@ -218,20 +173,109 @@ class DBHelper {
         }
     };
 
-    async Insert(tblName: string, insertObj: any): Promise<string | object> {
-        try {
-            const insertQuery: string = `INSERT INTO ${tblName} SET ${Object.entries(insertObj).map(([k, v]) => `${k} = ${(v as any)[0] === '\\' ? (v as any).slice(1) : escape(v)}`).join(', ')}`;
 
-            const insertResult: any = await this.executeQuery(insertQuery);
+    async MultiJoin(joinType: string, joinQuery: any, outerTblName: string, joinTargetList: string[], outerSelectList?: string[], outerWhere?: Record<string, any>, addOption?: string, onlyOne?: false): Promise<number> {
+        try {
+
+            let targetQuery = `
+                SELECT j.${this.getSelectTargetQuery(outerSelectList)}, i.*
+                FROM (
+                    ${joinQuery}
+                ) i
+                ${joinType} JOIN ${outerTblName} j ON `;
+
+            let andFlag = false;
+
+            for (const targetObj of joinTargetList) {
+                if(andFlag)
+                    targetQuery += ` AND`;
+
+                targetQuery +=  ` j.${targetObj} = i.${targetObj}`;
+                andFlag = true;
+            }
+
+            if(addOption)
+                targetQuery += addOption;
+
+            const resultSet: any = await this.executeQuery(targetQuery);
+
+            Logger.debug('findOne Query Result : ' + JSON.stringify(resultSet));
+
+            if(onlyOne)
+                return resultSet[0];
+
+            return resultSet;
+
+        } catch (err) {
+            Logger.debug('Insert Query Fail By : ' + err.stack);
+            return null;
+        }
+    };
+
+
+    async Join(joinType:string, subTblName: string, outerTblName: string, joinTargetList: string[], addOption?: string, subWhere?: Record<string, any>, subSelectList?: string[],
+                outerSelectList?: string[], outerWhere?: Record<string, any>, onlyQuery?: false, onlyOne?: false): Promise<any> {
+        try {
+
+            // 서브쿼리
+            const subSelectQuery = this.getSelectQuery(subTblName, subWhere, subSelectList);
+            
+            let targetQuery = `
+                SELECT j.${this.getSelectTargetQuery(outerSelectList)}, i.*
+                FROM (
+                    ${subSelectQuery}
+                ) i
+                ${joinType} JOIN ${outerTblName} j ON `;
+
+            let andFlag = false;
+
+            for (const targetObj of joinTargetList) {
+                if(andFlag)
+                    targetQuery += ` AND`;
+
+                targetQuery +=  ` j.${targetObj} = i.${targetObj}`;
+                andFlag = true;
+            }
+
+            if(addOption)
+                targetQuery += addOption;
+
+
+            if(onlyQuery)
+                return targetQuery;
+
+            const resultSet: any = await this.executeQuery(targetQuery);
+
+            Logger.debug('findOne Query Result : ' + JSON.stringify(resultSet));
+
+            if(onlyOne)
+                return resultSet[0];
+
+            return resultSet;
+
+        } catch (err) {
+            Logger.debug('Insert Query Fail By : ' + err.stack);
+            return null;
+        }
+    };
+
+    async Insert(tblName: string, insertObj: any): Promise<number> {
+        try {
+            const insertQuery: string = this.getInsertQuery(tblName, insertObj);
 
             Logger.debug('Insert Query is : ' + insertQuery);
 
-            if(!insertResult.affectedRows)
-                return null;
+            const insertResult: any = await this.executeQuery(insertQuery);
 
             Logger.debug('Insert Query Result : ' + JSON.stringify(insertResult));
 
-            return insertResult.insertId;
+            if(insertResult && !insertResult.affectedRows)
+                return null;
+
+            if(insertResult.insertId)
+                return insertResult.insertId;
+            else
+                return insertResult.affectedRows;
 
         } catch (err) {
             Logger.debug('Insert Query Fail By : ' + err.stack);
@@ -244,7 +288,7 @@ class DBHelper {
 
             const deleteQuery = `DELETE FROM ${tblName}`
 
-            const whereQuery = this.whereConditions(targetObj)
+            const whereQuery = this.getWhereQuery(targetObj)
 
             const targetQuery = deleteQuery + whereQuery;
 
@@ -271,7 +315,7 @@ class DBHelper {
 
             const selectQuery = `UPDATE ${tblName} SET ${Object.entries(updateObj).map(([k, v]) => `${k} = ${(v as any)[0] === '\\' ? (v as any).slice(1) : escape(v)}`).join(', ')}`
 
-            const whereQuery = `WHERE ${(this.whereConditions(targetObj))}`;
+            const whereQuery = `WHERE ${(this.getWhereQuery(targetObj))}`;
 
             const targetQuery = selectQuery + whereQuery;
 
@@ -292,8 +336,74 @@ class DBHelper {
         }
     };
 
+
     // ==== InsertQuery ====
-    InsertQuery(tblName: string, insertObj: any): string {
+
+    getSelectQuery(tblName: string, whereObj: Record<string, any>, selectList:string[], addOption?: string): string {
+
+        let selectQuery: string = `SELECT `;
+
+        if(selectList)
+            selectQuery += this.getSelectTargetQuery(selectList);
+        else
+            selectQuery += ` * `
+
+        selectQuery += ` FROM ${tblName}`;
+
+        let whereQuery: string = ``;
+
+        if (whereObj)
+            whereQuery = this.getWhereQuery(whereObj);
+
+        if(!addOption)
+            addOption = ``;
+
+        const targetQuery = selectQuery + whereQuery + addOption;
+
+        return targetQuery
+
+    }
+
+    getWhereQuery(whereObj: Record<string, any>): string {
+
+        let whereQuery = ` WHERE 1 = 1 `;
+
+        for (const targetObj in whereObj) {
+            if (EncryptColumns.includes(targetObj))
+                whereQuery +=  `AND CAST(AES_DECRYPT(UNHEX(${targetObj}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) AS CHAR) = ${escape(whereObj[targetObj])}`
+            else
+                whereQuery += ` AND ${targetObj} = ${escape(whereObj[targetObj])}`
+        }
+
+        return whereQuery;
+
+    }
+
+    getSelectTargetQuery(selectList?: string[]): string {
+
+        let selectQuery = ``;
+
+        if(!selectList) {
+            selectQuery = ` * `;
+        } else {
+            for (const targetObj of selectList) {
+                if (EncryptColumns.includes(targetObj))
+                    selectQuery += `CAST(AES_DECRYPT(UNHEX(${targetObj}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) AS CHAR) as ${targetObj} ,`
+                else
+                    selectQuery += `${targetObj} ,`
+
+            }
+
+            if(selectQuery.slice(-1) === `,`)
+                selectQuery = selectQuery.slice(0, -1);
+        }
+
+        return selectQuery;
+
+    }
+
+    // ==== InsertQuery ====
+    getInsertQuery(tblName: string, insertObj: any): string {
         try {
 
             let insertQuery = `INSERT INTO ${tblName} SET `;
@@ -315,12 +425,12 @@ class DBHelper {
         }
     };
 
-    UpdateQuery = (tblName: string, updateObj: any, targetObj: TargetObject): string => {
+    getUpdateQuery = (tblName: string, updateObj: any, targetObj: TargetObject): string => {
         try {
 
             const selectQuery = `UPDATE ${tblName} SET ${Object.entries(updateObj).map(([k, v]) => `${k} = ${(v as any)[0] === '\\' ? (v as any).slice(1) : escape(v)}`).join(', ')}`
 
-            const whereQuery = `WHERE ${(this.whereConditions(targetObj))}`;
+            const whereQuery = `WHERE ${(this.getWhereQuery(targetObj))}`;
 
             const targetQuery = selectQuery + whereQuery;
 
