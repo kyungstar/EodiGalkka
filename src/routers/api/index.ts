@@ -3,20 +3,29 @@ import UserRoutes from "./UserRoutes";
 import FileRoutes from "./FileRoutes";
 import TourRoutes from "./TourRoutes";
 import ChatRoutes from "./ChatRoutes";
+import Logger from "../../modules/Logger";
+
+const SERVER_TYPE = process.argv[2];
+
 
 const router = Router();
 
-// 고객 서비스
-router.use("/api/user", UserRoutes);
+
+if(SERVER_TYPE.includes("USER")) {
+    // 고객 서비스
+    router.use("/api/user", UserRoutes);
+    // 파일 서비스
+    router.use("/api/file", FileRoutes);
+    // 투어 서비스
+    router.use("/api/tour", TourRoutes);
+}
 
 // 채팅 서비스
-router.use("/api/chat", ChatRoutes);
+if(SERVER_TYPE.includes("CHAT")) {
+    router.use("/api/chat", ChatRoutes);
+}
 
-// 파일 서비스
-router.use("/api/file", FileRoutes);
 
-// 투어 서비스
-router.use("/api/tour", TourRoutes);
 
 export default router;
 
