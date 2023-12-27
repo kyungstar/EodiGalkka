@@ -109,7 +109,7 @@ export default class UserService {
 
 
             const userInsertResult = await DBHelper.tranQuery([
-                DBHelper.InsertQuery("user", {
+                DBHelper.getInsertQuery("user", {
                     user_id: userId,
                     type: userJoin.userType,
                     nickname: userJoin.nickName,
@@ -120,7 +120,7 @@ export default class UserService {
                     address_detail: userJoin.addressDetail,
                     name: userJoin.name
                 }),
-                DBHelper.InsertQuery("user_login",{
+                DBHelper.getInsertQuery("user_login",{
                     user_id: userId,
                     login_id: userJoin.loginId,
                     password: passWd
@@ -227,43 +227,33 @@ export default class UserService {
 
         try {
 
-
-            const userData = await this.getLoginData({login_id: userJoin.loginId});
+            const userData: any = await this.getLoginData({login_id: userJoin.loginId});
 
             if (!userData)
                 return [false, "로그인에 실패했습니당."];
 
 
+            const userUdtResult = await DBHelper.Update("user",{
+                nickname: userJoin.nickName,
+                address: userJoin.address,
+                address_detail: userJoin.addressDetail,
+                phone_number: userJoin.phoneNumber,
+                email: userJoin.email,
+                name: userJoin.name
+            },{
+                user_id: userData.user_id
+            })
+
+            if(!userUdtResult) {
+                return [false, "회원정보 수정에 실패하였습니다."];
+            }
+
+            return [true, "회원정보 수정에 성공하였습니다."];
+
         } catch (err) {
             Logger.error("userJoin " + err.stack);
             return [false, "회원정보 수정에 실패하였습니다."];
         }
-
-            /*
-
-                            // User 엔티티 생성
-                            const user: User = new User();
-                            const userLogin: UserLogin = new UserLogin();
-
-                            user.nickname = userJoin.nickName;
-                            user.gender = userJoin.gender;
-                            user.address = userJoin.address;
-                            user.address_detail = userJoin.addressDetail;
-
-                            user.phoneNumber = encryptData(userJoin.phoneNumber);
-                            user.email = encryptData(userJoin.email);
-                            user.name = encryptData(userJoin.name);
-
-
-                            // User 엔티티와 UserLogin 엔티티를 저장합니다.
-                            await UserHelper.manager.update(User, {id: userData.user_id}, user); // userId에 실제 유저 ID를 제공해야 합니다.
-                            await UserHelper.manager.update(UserLogin, {userId: userData.user_id}, userLogin); // userId에 실제 유저 ID를 제공해야 합니다.
-
-                            // User 엔티티 저장
-                            await UserHelper.commitTransaction();
-            */
-
-            return [true, "회원정보 수정에 성공하였습니다."];
 
     }
 
@@ -271,34 +261,30 @@ export default class UserService {
 
         try {
 
-            const userData = await this.getLoginData({login_id: userLogin.loginId});
+            const userData: any = await this.getLoginData({login_id: userLogin.loginId});
 
             if (!userData)
-                return [false, "로그인에 실패했습니당."];
+                return [false, "로그인에 실패했습니다."];
 
             const tempPwd = await MyAuth.generateUserId();
 
             const targetTempPwd = tempPwd.slice(0, 7);
-/*
+
 
             const passWd = await MyAuth.getEncryptPwd(userData.user_id, targetTempPwd);
 
-            const UserHelper = AppDataSource.getRepository(UserLogin);
 
-            const userPwdUpdate = await UserHelper.update({password: passWd, issue_temp: 1}, {user_id: userData.user_id})
+            const userPwdUpdate = await DBHelper.Update("user_login", {password: passWd, issue_temp: 1}, {user_id: userData.user_id});
 
-
-            if (userPwdUpdate) {
-                return [true, "비밀번호 변경 성공"];
-            } else {
+            if(!userPwdUpdate) {
                 return [false, "비밀번호 변경 실패"];
             }
-*/
-            return [false, "비밀번호 변경 실패"];
+
+            return [true, "비밀번호 변경 성공"];
 
         } catch (err) {
             Logger.error("userJoin " + err.stack);
-            return [false, "회원정보 수정에 실패하였습니다."];
+            return [false, "비밀번호 변경 실패"];
         }
     }
 
