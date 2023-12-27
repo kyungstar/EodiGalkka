@@ -7,7 +7,7 @@ import ResHandler from "../ResHandler";
 import Logger from "../../../modules/Logger";
 import DataValiator from "../../../service/DataValiator";
 import {Request, Response} from "express";
-import {chatRoomInterface, chatRoomSchema} from "../../../repositories/ChatEntity";
+import {chatRoomInterface, chatRoomSchema, chatUserInterface, chatUserSchema} from "../../../repositories/ChatEntity";
 import ChatService from "../../../service/chat/ChatService";
 import DBHelper from "../../../modules/DBHelper";
 
@@ -65,7 +65,7 @@ class ChatController extends ResHandler {
             // 데이터 검증
             const data = DataValiator.checkSchema(
                 DataValiator.initRequest(req, res, chatRoomSchema),
-                DataValiator.checkString(["chatRoomName"])
+                DataValiator.checkString(["chatRoomName", "userIds"])
             ) as chatRoomInterface;
 
             const checkResult = DataValiator.checkResult(data);
@@ -76,8 +76,11 @@ class ChatController extends ResHandler {
 
             const [createRoomResult, roomCode, roomData] = await ChatService.createChatRoom(data);
 
-            if (!createRoomResult)
+            if (!createRoomResult) {
                 this.false(roomCode, res);
+                return;
+            }
+
 
             this.true(roomCode, res);
 
@@ -114,9 +117,25 @@ class ChatController extends ResHandler {
 
         try {
 
-            const userData = await DBHelper.findOne("user", {phoneNumber: "5310eaf312e8b5b426f090efde0a9252"})
+            const data = DataValiator.checkSchema(
+                DataValiator.initRequest(req, res, chatUserSchema),
+            ) as chatUserInterface;
 
-            Logger.info(JSON.stringify(userData));
+            const checkResult = DataValiator.checkResult(data);
+
+            if (!checkResult) {
+                return this.validErr(res);
+            }
+
+            const [myRoomResult, myRoomCode, myRoomList] = await ChatService.getMyRoom(data);
+
+            if (!myRoomResult) {
+                this.false(myRoomCode, res);
+                return
+            }
+
+            this.true(myRoomCode, res, myRoomList);
+
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
