@@ -14,6 +14,39 @@ import DBHelper from "../../../modules/DBHelper";
 
 class ChatController extends ResHandler {
 
+    public sendMsg = async (req: Request, res: Response) => {
+
+        try {
+
+            const data = DataValiator.checkSchema(
+                DataValiator.initRequest(req, res, chatUserSchema),
+            ) as chatUserInterface;
+
+            const checkResult = DataValiator.checkResult(data);
+
+            if (!checkResult) {
+                return this.validErr(res);
+            }
+
+            /*if (!user)
+                return null;
+
+            const newMessage = new Chat({
+                chat: message,
+                user: {
+                    id: user._id,
+                    name: user.name
+                }
+            });
+            await newMessage.save();
+            return newMessage;
+            */
+        } catch (err) {
+            Logger.error(err.stack);
+            return null;
+        }
+    }
+
     // 메시지 저장, user any 수정 필요함
     public saveChat = async (message: string, user: any) => {
 

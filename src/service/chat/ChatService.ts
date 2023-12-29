@@ -14,8 +14,6 @@ export default class UserService {
                 create_user_id: chatRoom.userId
             });
 
-            Logger.info(targetRoom);
-
             const selfChatRoom = await DBHelper.Insert("chat_room_member",{
                 chat_room_seq: targetRoom,
                 user_id: chatRoom.userId
@@ -48,7 +46,7 @@ export default class UserService {
             return [true, "채팅방 목록", {myRoomList: myRoomList}];
 
         } catch (err) {
-            Logger.error("createChatRoom " + err);
+            Logger.error("getMyRoom " + err);
             return [false, "채팅방 생성에 실패하였습니다."];
         }
     }

@@ -18,6 +18,9 @@ router.post("/room/member", [JwtCheck], ChatController.roomMember);
 // 채팅방 초대하기
 router.post("/member/invite", [JwtCheck], ChatController.inviteMember);
 
+// 메시지 발송하기
+router.post("/send/msg", [JwtCheck], ChatController.inviteMember);
+
 
 
 export default router;
