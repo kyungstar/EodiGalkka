@@ -1,5 +1,6 @@
 
 import {createServer} from "http";
+import express from "express";
 import formData from "express-form-data";
 
 import Config, {RUN_MODE} from "../config";
@@ -29,6 +30,9 @@ app.use(formData.parse({
 // 파일 업로드를 위한 미들웨어를 등록합니다.
 // 미들웨어와 함께 사용되며, 다중 파일 업로드를 지원하기 위해 사용됩니다. 이 미들웨어는 파싱된 파일들을 하나의 객체로 병합하여 req.body에 저장합니다.
 app.use(formData.union());
+
+// json도 사용할 수 있도록 수정한다.
+app.use(express.json());
 
 // Restful Routing
 app.use("/", router);
