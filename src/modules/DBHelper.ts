@@ -217,11 +217,16 @@ class DBHelper {
                 outerSelectList?: string[], outerWhere?: Record<string, any>, onlyQuery?: false, onlyOne?: false): Promise<any> {
         try {
 
+            if(outerSelectList.length === 0) {
+                Logger.info("Join Query: Select statement is required.");
+                return false;
+            }
+
             // 서브쿼리
             const subSelectQuery = this.getSelectQuery(subTblName, subWhere, subSelectList);
             
             let targetQuery = `
-                SELECT j.${this.getSelectTargetQuery(outerSelectList)}, i.*
+                SELECT ${this.getSelectTargetQuery(outerSelectList)}, i.*
                 FROM (
                     ${subSelectQuery}
                 ) i
@@ -403,10 +408,16 @@ class DBHelper {
     }
 
     // ==== InsertQuery ====
-    getInsertQuery(tblName: string, insertObj: any): string {
+    // 이부분은 다중 INSERT 되도록 수정이 필요할듯함
+    getInsertQuery(tblName: string, insertObj: any, option?: string): string {
         try {
 
-            let insertQuery = `INSERT INTO ${tblName} SET `;
+            let insertQuery = `${option === "REPLACE" ? option : `INSERT ${option}`} INTO ${tblName} VALUES `;
+
+            // > INSERT INTO table_name (column1, column2, column3, ...)
+            // VALUES (value1, value2, value3, ...); > 로 변경하기
+
+            Logger.info(JSON.stringify(insertObj));
 
             let flag = true;
             for (const targetObj in insertObj) {
