@@ -409,25 +409,28 @@ class DBHelper {
 
     // ==== InsertQuery ====
     // 이부분은 다중 INSERT 되도록 수정이 필요할듯함
-    getInsertQuery(tblName: string, insertObj: any, option?: string): string {
+    getInsertQuery(tblName: string, insertObj: any, option: string = ""): string {
         try {
 
-            let insertQuery = `${option === "REPLACE" ? option : `INSERT ${option}`} INTO ${tblName} VALUES `;
+            let insertQuery = `${option === `REPLACE` ? `${option} INTO ${tblName}  ( ` : `INSERT ${option} INTO ${tblName}   (`}`    //option === "REPLACE" ? option : `INSERT ${option} INTO ${tblName}  (`;
 
-            // > INSERT INTO table_name (column1, column2, column3, ...)
-            // VALUES (value1, value2, value3, ...); > 로 변경하기
 
-            Logger.info(JSON.stringify(insertObj));
+            for(const key of Object.keys(insertObj)) {
+                insertQuery += key + " ,"
+            }
+
+            insertQuery = insertQuery.slice(0, -1) + ") VALUES (";
 
             let flag = true;
             for (const targetObj in insertObj) {
                 if (EncryptColumns.includes(targetObj))
-                    insertQuery += `${flag ? `${targetObj} ` : `, ${targetObj}`}  = HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
+                    insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
                 else
-                    insertQuery += ` ${flag ? `${targetObj} ` : `, ${targetObj}`} = ${escape(insertObj[targetObj])}`
+                    insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
                 flag = false;
             }
 
+            insertQuery += ")";
             return insertQuery;
 
         } catch (err) {
