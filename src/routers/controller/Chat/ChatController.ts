@@ -7,7 +7,13 @@ import ResHandler from "../ResHandler";
 import Logger from "../../../modules/Logger";
 import DataValiator from "../../../service/DataValiator";
 import {Request, Response} from "express";
-import {chatRoomInterface, chatRoomSchema, chatUserInterface, chatUserSchema} from "../../../repositories/ChatEntity";
+import {
+    chatRoomInterface,
+    chatRoomMemberSchema,
+    chatRoomSchema,
+    chatUserInterface,
+    chatUserSchema
+} from "../../../repositories/ChatEntity";
 import ChatService from "../../../service/chat/ChatService";
 import DBHelper from "../../../modules/DBHelper";
 
@@ -114,7 +120,6 @@ class ChatController extends ResHandler {
                 return;
             }
 
-
             this.true(roomCode, res);
 
         } catch (err) { // 유효성 검사 에러
@@ -127,6 +132,28 @@ class ChatController extends ResHandler {
 
         try {
 
+            Logger.info(JSON.stringify(req.body));
+
+            // 데이터 검증
+            const data = DataValiator.checkSchema(
+                DataValiator.initRequest(req, res, chatRoomMemberSchema),
+                DataValiator.checkString(["chatRoomSeq"])
+            ) as chatRoomInterface;
+
+            const checkResult = DataValiator.checkResult(data);
+
+            if (!checkResult) {
+                return this.validErr(res);
+            }
+
+            const [createRoomResult, roomCode, roomMemberList] = await ChatService.getRoomMember(data);
+
+            if (!createRoomResult) {
+                this.false(roomCode, res);
+                return;
+            }
+
+            this.true(roomCode, res, roomMemberList);
 
 
         } catch (err) { // 유효성 검사 에러
@@ -139,6 +166,27 @@ class ChatController extends ResHandler {
     public inviteMember = async (req: Request, res: Response) => {
 
         try {
+
+            // 데이터 검증
+            const data = DataValiator.checkSchema(
+                DataValiator.initRequest(req, res, chatRoomSchema),
+                DataValiator.checkString(["chatRoomSeq", "userIds"])
+            ) as chatRoomInterface;
+
+            const checkResult = DataValiator.checkResult(data);
+
+            if (!checkResult) {
+                return this.validErr(res);
+            }
+
+            const [createRoomResult, roomCode, roomData] = await ChatService.createChatRoom(data);
+
+            if (!createRoomResult) {
+                this.false(roomCode, res);
+                return;
+            }
+
+            this.true(roomCode, res);
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
