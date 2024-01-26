@@ -4,6 +4,7 @@ import Config, {RUN_MODE} from "../../config";
 import {escape} from "sqlstring";
 import JSON from "json-bigint";
 import {EncryptColumns} from "../../config/Security"
+import m from "gm";
 
 interface DBConfig {
     host: string;
@@ -173,7 +174,6 @@ class DBHelper {
         }
     };
 
-
     async MultiJoin(joinType: string, joinQuery: any, outerTblName: string, joinTargetList: string[], outerSelectList?: string[], outerWhere?: Record<string, any>, addOption?: string, onlyOne?: false): Promise<number> {
         try {
 
@@ -264,9 +264,9 @@ class DBHelper {
         }
     };
 
-    async Insert(tblName: string, insertObj: any, multi: boolean = false): Promise<number> {
+    async Insert(tblName: string, insertObj: any, option: string = "", multi: boolean = false): Promise<number> {
         try {
-            const insertQuery: string = this.getInsertQuery(tblName, insertObj);
+            const insertQuery: string = this.getInsertQuery(tblName, insertObj, option, multi);
 
             Logger.debug('Insert Query is : ' + insertQuery);
 
@@ -369,20 +369,29 @@ class DBHelper {
 
     }
 
+
     getWhereQuery(whereObj: Record<string, any>): string {
 
         let whereQuery = ` WHERE 1 = 1 `;
 
         for (const targetObj in whereObj) {
-            if (EncryptColumns.includes(targetObj))
+            if (EncryptColumns.includes(targetObj)) {
                 whereQuery +=  `AND CAST(AES_DECRYPT(UNHEX(${targetObj}), ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}) AS CHAR) = ${escape(whereObj[targetObj])}`
-            else
+            } else if (Array.isArray(whereObj[targetObj])) {
+                // Handle IN clause for arrays
+                const escapedValues = whereObj[targetObj].map((value: any) => escape(value)).join(', ');
+                whereQuery += ` AND ${targetObj} IN (${escapedValues})`;
+            }  else {
                 whereQuery += ` AND ${targetObj} = ${escape(whereObj[targetObj])}`
+            }
+
         }
 
         return whereQuery;
 
     }
+
+
 
     getSelectTargetQuery(selectList?: string[]): string {
 
@@ -414,25 +423,36 @@ class DBHelper {
 
             let insertQuery = `${option === `REPLACE` ? `${option} INTO ${tblName}  ( ` : `INSERT ${option} INTO ${tblName}   (`}`    //option === "REPLACE" ? option : `INSERT ${option} INTO ${tblName}  (`;
 
-
-            for(const key of Object.keys(insertObj)) {
-                insertQuery += key + " ,"
+            if(multi) {
+                for(const key of Object.keys(insertObj[0])) {
+                    insertQuery += key + " ,"
+                }
+            } else {
+                for(const key of Object.keys(insertObj)) {
+                    insertQuery += key + " ,"
+                }
             }
 
-            insertQuery = insertQuery.slice(0, -1) + ") VALUES (";
+            insertQuery = insertQuery.slice(0, -1) + ") VALUES ";
 
             let flag = true;
             if(multi) {
                 for (const insertData of insertObj) {
-                    for (const targetObj in insertObj) {
+                    insertQuery += "(";
+                    for(const targetObj in insertData) {
                         if (EncryptColumns.includes(targetObj))
-                            insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
+                            insertQuery += ` HEX(AES_ENCRYPT(${escape(insertData[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
                         else
-                            insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
-                        flag = false;
+                            insertQuery += `${escape(insertData[targetObj])}`
+                        insertQuery += ",";
                     }
+                    insertQuery = insertQuery.slice(0, -1);
+                    insertQuery += "),";
                 }
+                insertQuery = insertQuery.slice(0, -1);
             } else {
+                insertQuery += "(";
+
                 for (const targetObj in insertObj) {
                     if (EncryptColumns.includes(targetObj))
                         insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
@@ -440,9 +460,11 @@ class DBHelper {
                         insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
                     flag = false;
                 }
+
+                insertQuery += ")";
             }
 
-            insertQuery += ")";
+
             return insertQuery;
 
         } catch (err) {
