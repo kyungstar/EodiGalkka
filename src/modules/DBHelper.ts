@@ -264,7 +264,7 @@ class DBHelper {
         }
     };
 
-    async Insert(tblName: string, insertObj: any): Promise<number> {
+    async Insert(tblName: string, insertObj: any, multi: boolean = false): Promise<number> {
         try {
             const insertQuery: string = this.getInsertQuery(tblName, insertObj);
 
@@ -409,7 +409,7 @@ class DBHelper {
 
     // ==== InsertQuery ====
     // 이부분은 다중 INSERT 되도록 수정이 필요할듯함
-    getInsertQuery(tblName: string, insertObj: any, option: string = ""): string {
+    getInsertQuery(tblName: string, insertObj: any, option: string = "", multi: boolean = false): string {
         try {
 
             let insertQuery = `${option === `REPLACE` ? `${option} INTO ${tblName}  ( ` : `INSERT ${option} INTO ${tblName}   (`}`    //option === "REPLACE" ? option : `INSERT ${option} INTO ${tblName}  (`;
@@ -422,12 +422,24 @@ class DBHelper {
             insertQuery = insertQuery.slice(0, -1) + ") VALUES (";
 
             let flag = true;
-            for (const targetObj in insertObj) {
-                if (EncryptColumns.includes(targetObj))
-                    insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
-                else
-                    insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
-                flag = false;
+            if(multi) {
+                for (const insertData of insertObj) {
+                    for (const targetObj in insertObj) {
+                        if (EncryptColumns.includes(targetObj))
+                            insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
+                        else
+                            insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
+                        flag = false;
+                    }
+                }
+            } else {
+                for (const targetObj in insertObj) {
+                    if (EncryptColumns.includes(targetObj))
+                        insertQuery += `${flag ? `` : `,`} HEX(AES_ENCRYPT(${escape(insertObj[targetObj])}, ${escape(Config.DB[RUN_MODE].SECURITY.KEY)}))`
+                    else
+                        insertQuery += ` ${flag ? `` : `,`} ${escape(insertObj[targetObj])}`
+                    flag = false;
+                }
             }
 
             insertQuery += ")";
