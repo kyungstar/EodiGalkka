@@ -3,12 +3,10 @@ import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema({
         chat: String,
+        chat_room_seq: Number,
+        chat_key: String,
         user: {
-            id: {
-                type: mongoose.Schema.ObjectId,
-                ref: "ChatUser"
-            },
-            name: String
+            userId: String
         },
     }, { timestamps: true }
 );
