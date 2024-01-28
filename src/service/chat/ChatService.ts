@@ -9,22 +9,22 @@ export default class UserService {
 
         try {
 
-            const targetRoom = await DBHelper.Insert("chat_room",{
+료            const targetRoom = await DBHelper.Insert("chat_room", {
                 chat_room_name: chatRoom.chatRoomName,
                 create_user_id: chatRoom.userId
             });
 
-            if(!targetRoom) {
+            if (!targetRoom) {
                 return [false, "채팅방 생성에 실패하였습니다."];
             }
 
-            const selfChatRoom = await DBHelper.Insert("chat_room_member",{
+            const selfChatRoom = await DBHelper.Insert("chat_room_member", {
                 chat_room_seq: targetRoom,
                 user_id: chatRoom.userId
             });
 
-            if(!targetRoom || !selfChatRoom) {
-                await DBHelper.Delete("chatting_room",{chat_room_seq: targetRoom});
+            if (!targetRoom || !selfChatRoom) {
+                await DBHelper.Delete("chatting_room", {chat_room_seq: targetRoom});
                 return [false, "채팅방 생성에 실패하였습니다."];
             }
 
@@ -40,10 +40,10 @@ export default class UserService {
 
         try {
 
-            const myRoomList = await DBHelper.Join("INNER", "chat_room_member","chat_room",["chat_room_seq"], ""
+            const myRoomList = await DBHelper.Join("INNER", "chat_room_member", "chat_room", ["chat_room_seq"], ""
                 , {user_id: chatRoom.userId}, ["chat_room_seq"], ["chat_room_name"]);
 
-            if(!myRoomList) {
+            if (!myRoomList) {
                 return [false, "채팅방 목록 조회에 실패하였습니다."];
             }
 
@@ -60,10 +60,10 @@ export default class UserService {
         try {
 
             const chatRoomMemberList = await DBHelper.Join("INNER",
-                "chat_room_member","user",["user_id"], ""
+                "chat_room_member", "user", ["user_id"], ""
                 , {chat_room_seq: chatRoom.chatRoomSeq}, ["chat_room_seq", "user_id"], ["email", "phone_number"]);
 
-            if(!chatRoomMemberList) {
+            if (!chatRoomMemberList) {
                 return [false, "채팅방 참여목록 조회에 실패하였습니다."];
             }
 
@@ -80,11 +80,29 @@ export default class UserService {
         try {
 
             // 이미 있는 사람이라면 제외한다.
+            const userIdList = chatRoom.userIds.split(",");
 
+            const userInsertMap = userIdList.map(userId => {
+                return {
+                    chat_room_seq: chatRoom.chatRoomSeq,
+                    user_id: userId
+                }
+            })
 
+            const userList = await DBHelper.find("user",{user_id: userIdList});
+
+            Logger.info(JSON.stringify(userList) + " userList");
+
+            const memberInsertRes = await DBHelper.Insert("chat_room_member", userInsertMap, "", true);
+
+            if(!memberInsertRes) {
+                return [false, "채팅방 초대에 실패하였습니다."];
+            }
+
+            return [true, "채팅방 초대에 성공하였습니다."];
         } catch (err) {
             Logger.error("getMyRoom " + err);
-            return [false, "채팅방 생성에 실패하였습니다."];
+            return [false, "채팅방 초대에 실패하였습니다."];
         }
     }
 

@@ -8,7 +8,7 @@ import Logger from "../../../modules/Logger";
 import DataValiator from "../../../service/DataValiator";
 import {Request, Response} from "express";
 import {
-    chatRoomInterface,
+    chatRoomInterface, chatRoomInviteSchema,
     chatRoomMemberSchema,
     chatRoomSchema,
     chatUserInterface,
@@ -169,7 +169,7 @@ class ChatController extends ResHandler {
 
             // 데이터 검증
             const data = DataValiator.checkSchema(
-                DataValiator.initRequest(req, res, chatRoomSchema),
+                DataValiator.initRequest(req, res, chatRoomInviteSchema),
                 DataValiator.checkString(["chatRoomSeq", "userIds"])
             ) as chatRoomInterface;
 
@@ -179,14 +179,14 @@ class ChatController extends ResHandler {
                 return this.validErr(res);
             }
 
-            const [createRoomResult, roomCode, roomData] = await ChatService.createChatRoom(data);
+            const [inviteMemberResult, inviteCode] = await ChatService.inviteRoomMember(data);
 
-            if (!createRoomResult) {
-                this.false(roomCode, res);
+            if (!inviteMemberResult) {
+                this.false(inviteCode, res);
                 return;
             }
 
-            this.true(roomCode, res);
+            this.true(inviteCode, res);
 
         } catch (err) { // 유효성 검사 에러
             this.err(err, res);
