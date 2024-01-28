@@ -22,6 +22,11 @@ export interface chatRoomInterface {
     chatRoomSeq?: number,
 };
 
+export interface chatRoomMemberInterface {
+    userIds?: string,
+    chatRoomSeq?: number,
+};
+
 export interface chatUserInterface {
     userId: string
 };
@@ -44,6 +49,15 @@ export const chatRoomMemberSchema = {
         chatRoomSeq: chatSchema.chatRoomSeq
     },
     required: ["chatRoomSeq"]
+};
+
+export const chatRoomInviteSchema = {
+    type: 'object',
+    properties: {
+        userIds: chatSchema.defaultSchema,
+        chatRoomSeq: chatSchema.chatRoomSeq
+    },
+    required: ["userIds", "chatRoomSeq"]
 };
 
 
