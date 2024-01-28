@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import Logger from "./Logger";
-import ChatController from "../routers/controller/Chat/ChatController";
+import ChatService from "../service/chat/ChatService";
+import {chatMsgInterface} from "../repositories/ChatEntity";
 
 export default function ioHandler(io: Server) {
     io.on("connection", async (socket: Socket) => {
@@ -19,12 +20,18 @@ export default function ioHandler(io: Server) {
         });
 
 
-        socket.on("sendMessage", async (message, cb)=> {
+        socket.on("sendMessage", async (userId, chatRoomSeq, message, cb)=> {
 
             try {
 
-                // 메시지 저장
-                const newMessage = await ChatController.saveChat(message, true);
+                let sendMsgModel: chatMsgInterface = {
+                    userId: userId,
+                    msg: message,
+                    chatRoomSeq: chatRoomSeq // 채팅 방 번호
+                };
+
+                const newMessage = await ChatService.sendMsg(sendMsgModel);
+
                 io.emit("message", newMessage);
             } catch (err) {
                 Logger.info(err.stack);
