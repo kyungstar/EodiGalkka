@@ -1,15 +1,41 @@
 import Logger from "../../modules/Logger";
+import {MyAuth} from "../../../src/modules/SecurityAuth";
 
-import {chatRoomInterface, chatUserInterface} from "../../repositories/ChatEntity";
+import {chatMsgInterface, chatRoomInterface, chatUserInterface} from "../../repositories/ChatEntity";
 import DBHelper from "../../modules/DBHelper";
+import Chat from "../../models/Chat";
 
 export default class UserService {
+
+    public static async sendMsg(chatMsg: chatMsgInterface): Promise<[boolean, string, any?]> {
+
+        try {
+
+            const newMessage = new Chat({
+                chat: chatMsg.msg,
+                chat_room_seq: chatMsg.chatRoomSeq,
+                chat_key: MyAuth.getEncryptCode(chatMsg.userId),
+                user: {
+                    userId: chatMsg.userId
+                }
+            });
+
+            await newMessage.save();
+
+            return [true, "SM0", newMessage];
+
+
+        } catch (err) {
+            Logger.error("createChatRoom " + err);
+            return [false, "채팅방 생성에 실패하였습니다."];
+        }
+    }
 
     public static async createChatRoom(chatRoom: chatRoomInterface): Promise<[boolean, string, any?]> {
 
         try {
 
-료            const targetRoom = await DBHelper.Insert("chat_room", {
+            const targetRoom = await DBHelper.Insert("chat_room", {
                 chat_room_name: chatRoom.chatRoomName,
                 create_user_id: chatRoom.userId
             });
@@ -55,6 +81,7 @@ export default class UserService {
         }
     }
 
+
     public static async getRoomMember(chatRoom: chatRoomInterface): Promise<[boolean, string, any?]> {
 
         try {
@@ -70,7 +97,7 @@ export default class UserService {
             return [true, "채팅방 참여목록", {myRoomList: chatRoomMemberList}];
 
         } catch (err) {
-            Logger.error("getMyRoom " + err);
+            Logger.error("getRoomMember " + err);
             return [false, "채팅방 생성에 실패하였습니다."];
         }
     }
@@ -91,9 +118,14 @@ export default class UserService {
 
             const userList = await DBHelper.find("user",{user_id: userIdList});
 
-            Logger.info(JSON.stringify(userList) + " userList");
 
-            const memberInsertRes = await DBHelper.Insert("chat_room_member", userInsertMap, "", true);
+            const userCount = Object.values(userList).length
+
+            if(!userList && userCount !== userIdList.length) {
+                return [false, "채팅방 멤버 확인에 실패하였습니다."];
+            }
+
+            const memberInsertRes = await DBHelper.Insert("chat_room_member", userInsertMap, "IGNORE", true);
 
             if(!memberInsertRes) {
                 return [false, "채팅방 초대에 실패하였습니다."];
@@ -101,7 +133,7 @@ export default class UserService {
 
             return [true, "채팅방 초대에 성공하였습니다."];
         } catch (err) {
-            Logger.error("getMyRoom " + err);
+            Logger.error("inviteRoomMember " + err);
             return [false, "채팅방 초대에 실패하였습니다."];
         }
     }

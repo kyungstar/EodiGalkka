@@ -1,4 +1,4 @@
-import UserService from "../../../service/user/UserService";
+
 
 import Chat from "../../../models/Chat";
 // import User from "../../../models/User";
@@ -8,25 +8,29 @@ import Logger from "../../../modules/Logger";
 import DataValiator from "../../../service/DataValiator";
 import {Request, Response} from "express";
 import {
+    chatMsgInterface,
     chatRoomInterface, chatRoomInviteSchema,
     chatRoomMemberSchema,
-    chatRoomSchema,
+    chatRoomSchema, chatSendSchema,
     chatUserInterface,
     chatUserSchema
 } from "../../../repositories/ChatEntity";
+
 import ChatService from "../../../service/chat/ChatService";
+import UserService from "../../../service/user/UserService";
+
 import DBHelper from "../../../modules/DBHelper";
 
 
 class ChatController extends ResHandler {
 
+    // 메시지 저장, user any 수정 필요함
     public sendMsg = async (req: Request, res: Response) => {
 
         try {
-
             const data = DataValiator.checkSchema(
-                DataValiator.initRequest(req, res, chatUserSchema),
-            ) as chatUserInterface;
+                DataValiator.initRequest(req, res, chatSendSchema),
+            ) as chatMsgInterface;
 
             const checkResult = DataValiator.checkResult(data);
 
@@ -34,43 +38,21 @@ class ChatController extends ResHandler {
                 return this.validErr(res);
             }
 
-            /*if (!user)
-                return null;
+            const userData = await UserService.getLoginData({user_id: data.userId});
 
-            const newMessage = new Chat({
-                chat: message,
-                user: {
-                    id: user._id,
-                    name: user.name
-                }
-            });
-            await newMessage.save();
-            return newMessage;
-            */
-        } catch (err) {
-            Logger.error(err.stack);
-            return null;
-        }
-    }
+            if(!userData) {
+                this.false("NU0", res);
+                return;
+            }
 
-    // 메시지 저장, user any 수정 필요함
-    public saveChat = async (message: string, user: any) => {
+            const [msgRes, msgCode, msg] = await ChatService.sendMsg(data);
 
-        try {
+            if(!msgRes) {
+                this.false(msgCode, res);
+                return;
+            }
 
-            if (!user)
-                return null;
-
-            const newMessage = new Chat({
-                chat: message,
-                user: {
-                    id: user._id,
-                    name: user.name
-                }
-            });
-
-            await newMessage.save();
-            return newMessage;
+            this.true(msgCode, res);
 
         } catch (err) {
             Logger.error(err.stack);
@@ -78,22 +60,7 @@ class ChatController extends ResHandler {
         }
     }
 
-    /*  public checkUser = async (sid: string) => {
 
-          try {
-              /!*const user = await User.findOne({token: sid});
-
-              if(!user)
-                  return null;
-
-              return user;*!/
-
-          } catch (err) {
-              Logger.error(err.stack);
-              return null;
-          }
-      }
-  */
 
     // === 채팅방 ===
 

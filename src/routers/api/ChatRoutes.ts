@@ -19,7 +19,8 @@ router.post("/room/member", [JwtCheck], ChatController.roomMember);
 router.post("/member/invite", [JwtCheck], ChatController.inviteMember);
 
 // 메시지 발송하기
-router.post("/send/msg", [JwtCheck], ChatController.inviteMember);
+// > API Test 용으로, 실제는 Socket on message로 이루어짐
+router.post("/send/msg", [JwtCheck], ChatController.sendMsg);
 
 
 
