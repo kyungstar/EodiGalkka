@@ -25,11 +25,17 @@ export interface chatRoomInterface {
 export interface chatRoomMemberInterface {
     userIds?: string,
     chatRoomSeq?: number,
-};
+}
 
 export interface chatUserInterface {
     userId: string
-};
+}
+
+export interface chatMsgInterface {
+    userId: string,
+    msg: string,
+    chatRoomSeq: Number
+}
 
 
 export const chatRoomSchema = {
@@ -67,4 +73,13 @@ export const chatUserSchema = {
         userId: chatSchema.defaultSchema
     },
     required: ["userId"]
+};
+
+export const chatSendSchema = {
+    type: 'object',
+    properties: {
+        userId: chatSchema.defaultSchema,
+        msg: chatSchema.defaultSchema
+    },
+    required: ["userId", "msg"]
 };
